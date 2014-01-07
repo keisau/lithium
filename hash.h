@@ -1,9 +1,10 @@
-#ifndef __SUBLIME_HASH_H__
-#define __SUBLIME_HASH_H__
+#ifndef __LITHIUM_HASH_H__
+#define __LITHIUM_HASH_H__
 
 #include <string.h>			// memcpy, etc
 #include "types.h"
 
+#define _PRIME_MASK		0xf
 // 16 selected primes
 const u32 _primes[16] = {
 	28472401U,
@@ -23,8 +24,7 @@ const u32 _primes[16] = {
 	3737267581U,
 	4129478957U,
 };
-#define _PRIME_MASK		0xf
-
+#define GOLDEN_RATIO_PRIME_32 0x9e370001UL
 #define _HASH_SHIFT_MASK		0x1f
 static inline index_t _hash (const u32 *s, u32 len)
 {
@@ -42,6 +42,46 @@ static inline index_t _hash (const u64 *s, u32 len)
 		retval ^= (s[i] >> (i & _HASH_SHIFT_MASK)) * _primes [i & _PRIME_MASK];
 	
 	return retval;
+}
+
+/**
+ * Hash 64-bit integers to an integer of the designated bits,
+ * copied from linux kernel.
+ */
+static inline u64 hash_64(u64 val, unsigned int bits)
+{
+	u64 retval = val;
+
+	/*  Sigh, gcc can't optimise this alone like it does for 32 bits. */
+	u64 n = retval;
+	n <<= 18;
+	retval -= n;
+	n <<= 33;
+	retval -= n;
+	n <<= 3;
+	retval += n;
+	n <<= 3;
+	retval -= n;
+	n <<= 4;
+	retval += n;
+	n <<= 2;
+	retval += n;
+
+	/* High bits are more random, so use them. */
+	return retval >> (64 - bits);
+}
+
+/**
+ * Hash 32-bit integers to an integer of the designated bits,
+ * copied from linux kernel.
+ */
+static inline u32 hash_32(u32 val, unsigned int bits)
+{
+	/* On some cpus multiply is faster, on others gcc will do shifts */
+	u32 retval = val * GOLDEN_RATIO_PRIME_32;
+
+	/* High bits are more random, so use them. */
+	return retval >> (32 - bits);
 }
 
 template <typename _KeyType>
@@ -64,4 +104,4 @@ static inline index_t _hash (const _KeyType &key)
 	return retval;
 }
 
-#endif // __SUBLIME_HASH_H__
+#endif // __LITHIUM_HASH_H__
