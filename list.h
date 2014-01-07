@@ -1,124 +1,125 @@
 #ifndef __LITHIUM_LIST_H__
 #define __LITHIUM_LIST_H__
-
+#include "lithium.h"
+#include "types.h"
 namespace li
 {
 #pragma pack (push, 4)
-template <typename _ValType>
-class list
-{
-public:
-	class iterator;
-	friend class iterator;
-
-protected:
-	struct list_node
-	{
-		_ValType value;
-		list_node *next, *prev;
-		list_node () 
+	template <typename _ValType>
+		class list
 		{
-			next = prev = this;
-		}
-		list_node (_ValType value) : value (value) {}
-	};
+		public:
+			class iterator;
+			friend class iterator;
 
-public:
-	list ()
-	{
-		head = tail = new list_node ();
-	}
+		protected:
+			struct list_node
+			{
+			public:
+				_ValType value;
+				list_node *prev, *next;
 
-	~list ()
-	{
-		// list_for_each_entry_safe
-		for (list_node *p = first, *nx;
-				p != NULL && ({ nx = p->next; true; });
-				p = nx)
-		{
-			delete p;
-		}
-	}
+			public:
+				list_node () { prev = next = this; }
+				list_node (_ValType value) : value (value) { prev = next = this; }
+			};
 
-	iterator insert (_ValType value);
-	iterator begin () { return iterator (head); }
-	iterator end () { return iterator (tail); }
+		public:
+			list ()
+			{
+				head = tail = new list_node ();
+			}
 
-protected:
-	list_node *head, *tail;
-};
+			~list ()
+			{
+				// list_for_each_entry_safe
+				for (list_node *p = head, *nx;
+						p != tail && ({ nx = p->next; true; });
+						p = nx)
+				{
+					delete p;
+				}
+				delete tail;
+			}
+
+			iterator insert (_ValType value);
+			iterator begin () { return iterator (head); }
+			iterator end () { return iterator (tail); }
+
+		protected:
+			list_node *head, *tail;
+		};
 #pragma pack (pop)
 
-/**
- * Iterator
- */
+	/**
+	 * Iterator
+	 */
 #pragma pack (push, 4)
-template <typename _ValType>
-class list<_ValType>::iterator : public std::iterator <std::bidirectional_iterator_tag,_ValType>
-{
-	friend class list<_ValType>;
-protected:
-	list_node *p;
+	template <typename _ValType>
+		class list<_ValType>::iterator : public std::iterator <std::bidirectional_iterator_tag,_ValType>
+		{
+			friend class list<_ValType>;
+		protected:
+			list_node *p;
 
-public:
-	// public constructors
-	iterator () : p (NULL) {}
-	iterator (const iterator &iter) : p (iter.p) {}
-protected:
-	// protected constructor
-	iterator (list_node *p) : p (p) {}
-	
-public:
-	iterator& operator= (const iterator &iter)
-	{
-		p = iter.p;
-		return *this;
-	}
+		public:
+			// public constructors
+			iterator () : p (NULL) {}
+			iterator (const iterator &iter) : p (iter.p) {}
+		protected:
+			// protected constructor
+			iterator (list_node *p) : p (p) {}
 
-	iterator& operator++ () 
-	{
-		p = p->next;
-		return *this;
-	}
+		public:
+			iterator& operator= (const iterator &iter)
+			{
+				p = iter.p;
+				return *this;
+			}
 
-	iterator operator++ (int)
-	{
-		iterator retval = iterator (*this);
-		p = p->next;
-		return retval;
-	}
+			iterator& operator++ () 
+			{
+				p = p->next;
+				return *this;
+			}
 
-	iterator& operator-- () 
-	{
-		p = p->prev;
-		return *this;
-	}
+			iterator operator++ (int)
+			{
+				iterator retval = iterator (*this);
+				p = p->next;
+				return retval;
+			}
 
-	iterator operator-- (int)
-	{
-		iterator retval = iterator (*this);
-		p = p->prev;
-		return retval;
-	}
+			iterator& operator-- () 
+			{
+				p = p->prev;
+				return *this;
+			}
 
-	bool operator== (const iterator &rvalue) const { return p == rvalue.p; }
-	bool operator!= (const iterator &rvalue) const { return p != rvalue.p; }
-	_ValType& operator* () const { return p->value; }
-	_ValType* operator-> () const { return &p->value; }
-};
+			iterator operator-- (int)
+			{
+				iterator retval = iterator (*this);
+				p = p->prev;
+				return retval;
+			}
+
+			bool operator== (const iterator &rvalue) const { return p == rvalue.p; }
+			bool operator!= (const iterator &rvalue) const { return p != rvalue.p; }
+			_ValType& operator* () const { return p->value; }
+			_ValType* operator-> () const { return &p->value; }
+		};
 #pragma pack (pop)
 
 	template <typename _ValType>
-typename list<_ValType>::iterator list<_ValType>::insert (_ValType value)
-{
-	list_node *node = new list_node (value);
-	node->next = first;
-	if (first)
-		first->pprev = &node->next;
-
-	first = node;
-	node->pprev = &first;
-	return iterator (node);
-}
+		typename list<_ValType>::iterator list<_ValType>::insert (_ValType value)
+		{
+			list_node *node = new list_node (value);
+			node->next = head;
+			node->prev = tail;
+			tail->next = node;
+			head->prev = node;
+			head = node;
+			return iterator (node);
+		}
 } // namespace li
 #endif // __LITHIUM_LIST_H__
