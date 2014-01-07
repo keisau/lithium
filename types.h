@@ -4,6 +4,7 @@
 #include <stdint.h>			// uint[8,16,32,64]_t, etc
 #include <utility>			// std::pair, etc
 #include <iterator>			// std::iterator, etc
+#include <functional>		// std::less<T>, etc
 
 /**
  * typedefs
