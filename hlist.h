@@ -47,6 +47,7 @@ namespace li
 			{
 				_ValType value;
 				hlist_node *next, **pprev;
+				hlist_node () : next (NULL), pprev (NULL) {}
 				hlist_node (_ValType value) : value (value) {}
 			};
 
@@ -66,6 +67,13 @@ namespace li
 			iterator insert (_ValType value);
 			iterator begin () { return iterator (first); }
 			iterator end () { return iterator (NULL); }
+			iterator tail ()
+			{
+				hlist_node *retval = first;
+				if (retval)
+					while (retval->next) retval = retval->next;
+				return iterator (retval);
+			}
 
 		protected:
 			hlist_node *first;
@@ -113,14 +121,20 @@ namespace li
 
 			iterator& operator-- () 
 			{
-				p = container_of (p->pprev, hlist_node, next);
+				if (p != NULL && p->pprev != NULL)
+					p = container_of (p->pprev, hlist_node, next);
+				else
+					p = NULL;
 				return *this;
 			}
 
 			iterator operator-- (int)
 			{
 				iterator retval = iterator (*this);
-				p = container_of (p->pprev, hlist_node, next);
+				if (p != NULL && p->pprev != NULL)
+					p = container_of (p->pprev, hlist_node, next);
+				else
+					p = NULL;
 				return retval;
 			}
 
@@ -140,7 +154,6 @@ namespace li
 				first->pprev = &node->next;
 
 			first = node;
-			node->pprev = &first;
 			return iterator (node);
 		}
 } // namespace li
