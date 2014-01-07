@@ -78,6 +78,21 @@ namespace li
 				}
 			}
 
+			// dfs
+			~radix_tree ()
+			{
+				radix_node *node = rt_root, *slot;
+				for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
+				{
+					if (node)
+					{
+						slot = node->slots[i];
+						if (slot)
+							delete slot;
+					}
+				}
+			}
+
 			iterator begin () { return iterator (list_head.next); }
 			iterator end () { return iterator (&list_tail); }
 
@@ -193,6 +208,7 @@ namespace li
 		public:
 			_ValType value;
 			list_node *prev, *next;
+			typename radix_tree<_ValType>::radix_node *container;
 
 		public:
 			list_node () { prev = next = this; }
@@ -257,6 +273,19 @@ namespace li
 				parent = this;
 				for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
 					slots[i] = NULL;
+			}
+			
+			// dfs delete
+			~radix_node ()
+			{
+				radix_node *slot;
+				if (flags == RT_INDIRECT_NODE)
+					for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
+					{
+						slot = slots[i];
+						if (slot)
+							delete slot;
+					}
 			}
 		};
 #pragma pack (pop)
@@ -327,6 +356,7 @@ namespace li
 
 			// insert to the iteration list
 			list_head.insert (&slots[index]->node);
+			slots[index]->node.container = parent;
 
 			// return iterator with the destination item (no matter new/old)
 			retval.first = iterator (&slots[index]->node);
@@ -406,7 +436,8 @@ out_not_found:
 			   p = p - offsetof (radix_node, node);
 			   radix_node *r_node = (radix_node *) p;
 			   */
-			radix_node *r_node = container_of (iter.p, radix_node, node);
+			radix_node *r_node = (iter.p)->container;
+//			radix_node *r_node = container_of (iter.p, radix_node, node);
 			radix_node *p_node = r_node->parent;
 
 			/**
