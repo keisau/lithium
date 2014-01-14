@@ -23,8 +23,15 @@ namespace li
 			_Type1		first;
 			_Type2		second;
 		};
-
 #pragma pack (pop)
+	template <typename _Type1, typename _Type2>
+		li::pair <_Type1, _Type2> make_pair (_Type1 x, _Type2 y)
+		{
+			li::pair<_Type1, _Type2> retval;
+			retval.first = x;
+			retval.second = y;
+			return retval;
+		}
 }
 
 // utility functions
