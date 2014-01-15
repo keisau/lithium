@@ -4,6 +4,7 @@
 #include "lithium.h"
 #include "hash.h"
 #include "hlist.h"
+#include "list.h"
 
 namespace li
 {
@@ -16,17 +17,25 @@ namespace li
 
 			// typedefs
 		protected:
-			typedef li::pair <_KeyType, _ValType>			__item_t;
+			struct item_node
+			{
+				_KeyType			key;
+				_ValType			value;
+				list_head			head;
+			};
+
 			typedef typename _Traits::type_t				__hash_key_t;
 
 			// public methods
 		public:
 			hashmap () : _size (4096) {
-				_table = new hlist <__item_t> [4096];
+				_table = new hlist <item_node> [4097];
+				_table [4096] = NULL;
 			}
 
 			hashmap (size_t size) : _size (size) {
-				_table = new hlist <__item_t> [_size];
+				_table = new hlist <item_node> [_size + 1];
+				_table [size] = NULL;
 			}
 
 			~hashmap () {}
@@ -54,7 +63,7 @@ namespace li
 			// attributes
 		protected:
 			size_t					_size;
-			li::hlist <__item_t>		*_table;
+			li::hlist <item_node>		*_table;
 		};
 }
 #endif // __LITHIUM_HASHMAP_H__
