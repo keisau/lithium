@@ -5,6 +5,25 @@
 namespace li
 {
 #pragma pack (push, 4)
+	struct list_head
+	{
+		list_head *prev, *next;
+		list_head () { prev = next = this; }
+		virtual ~list_head () {
+			prev->next = next;
+			next->prev = prev;
+		}
+		void insert (list_head * node)
+		{
+			list_head * tmp = next;
+			next = node;
+			tmp->prev = node;
+
+			node->prev = this;
+			node->next = tmp;
+		}
+	};
+
 	template <typename _ValType>
 		class list
 		{
