@@ -49,6 +49,11 @@ namespace li
 				hlist_node *next, **pprev;
 				hlist_node () : next (NULL), pprev (NULL) {}
 				hlist_node (_ValType value) : value (value) {}
+				~hlist_node () {
+					hlist_node *node = container_of (pprev, hlist_node, next);
+					node->next = next;
+					next->pprev = pprev;
+				}
 			};
 
 		public:
