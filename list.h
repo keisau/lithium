@@ -5,6 +5,16 @@
 namespace li
 {
 #pragma pack (push, 4)
+	struct list_head
+	{
+		list_head *prev, *next;
+		list_head () { prev = next = this; }
+		~list_head () {
+			prev->next = next;
+			next->prev = prev;
+		}
+	};
+
 	template <typename _ValType>
 		class list
 		{
