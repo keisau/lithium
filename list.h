@@ -1,3 +1,19 @@
+/**
+ * This file is part of lithium.
+ *
+ * lithium is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * lithium is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with lithium.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef __LITHIUM_LIST_H__
 #define __LITHIUM_LIST_H__
 #include "lithium.h"
@@ -13,6 +29,18 @@ namespace li
 			next->prev = prev;
 		}
 	};
+
+	static inline void list_insert (list_head *head, list_head *item) {
+		item->next = head->next;
+		head->next->prev = item;
+		head->next = item;
+		item->prev = head;
+	}
+
+	static inline void list_delete (list_head *head) {
+			head->prev->next = head->next;
+			head->next->prev = head->prev;
+	}
 
 	template <typename _ValType>
 		class list
