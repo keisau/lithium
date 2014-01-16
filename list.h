@@ -4,23 +4,13 @@
 #include "types.h"
 namespace li
 {
-#pragma pack (push, 4)
 	struct list_head
 	{
 		list_head *prev, *next;
 		list_head () { prev = next = this; }
-		virtual ~list_head () {
+		~list_head () {
 			prev->next = next;
 			next->prev = prev;
-		}
-		void insert (list_head * node)
-		{
-			list_head * tmp = next;
-			next = node;
-			tmp->prev = node;
-
-			node->prev = this;
-			node->next = tmp;
 		}
 	};
 
@@ -53,7 +43,12 @@ namespace li
 			{
 				// list_for_each_entry_safe
 				for (list_node *p = head, *nx;
-						p != tail && ({ nx = p->next; true; });
+						p != tail &&
+#ifndef _WIN32
+						({ nx = p->next; true; });
+#else
+						((nx = p->next) || true);
+#endif
 						p = nx)
 				{
 					delete p;
@@ -68,12 +63,10 @@ namespace li
 		protected:
 			list_node *head, *tail;
 		};
-#pragma pack (pop)
 
 	/**
 	 * Iterator
 	 */
-#pragma pack (push, 4)
 	template <typename _ValType>
 		class list<_ValType>::iterator : public std::iterator <std::bidirectional_iterator_tag,_ValType>
 		{
@@ -127,7 +120,6 @@ namespace li
 			_ValType& operator* () const { return p->value; }
 			_ValType* operator-> () const { return &p->value; }
 		};
-#pragma pack (pop)
 
 	template <typename _ValType>
 		typename list<_ValType>::iterator list<_ValType>::insert (_ValType value)
