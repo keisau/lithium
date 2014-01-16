@@ -35,6 +35,7 @@
 #include "lithium.h"
 #include "list.h"
 #include "iterator.h"
+#include <stdio.h>
 namespace li
 {
 	/**
@@ -259,7 +260,7 @@ namespace li
 			slots = (radix_node<_ValType> **)rt_root->slots;
 			height = rt_root->height;
 			shift = (height) * RT_BRANCH_FACTOR_BIT;
-			while (height > 0)
+			while (height > 1)
 			{
 				index = (key >> shift) & (RT_BRANCH_INDEX_MASK);
 				if (slots[index] == NULL)
@@ -307,12 +308,21 @@ out_not_found:
 	template <typename _ValType>
 		void radix_tree<_ValType>::erase (const iterator &iter)
 		{
-			radix_node<_ValType> *r_node = container_of (iter.p, radix_node<_ValType>, head);
+			list_head * tmp = iter.p;
+			radix_node<_ValType> *r_node;
+#ifndef _WIN32
+			r_node = container_of (tmp, radix_node<_ValType>, head);
+#else
+			char * _p = (char*) iter.p;
+			r_node = (radix_node<_ValType>*)(_p - offsetof (radix_node<_ValType>, head));
+#endif
+
 			radix_node<_ValType> *p_node = r_node->parent;
 
 			/**
 			* erase item in parent's slots
 			*/
+			printf ("DEBUG : %d\n", r_node->offset);
 			p_node->slots [r_node->offset] = NULL;
 			--p_node->size;
 			if (p_node->size == 0)
