@@ -31,15 +31,20 @@ namespace li
 	};
 
 	static inline void list_insert (list_head *head, list_head *item) {
-		item->next = head->next;
-		head->next->prev = item;
-		head->next = item;
-		item->prev = head;
+		if (head && item) {
+			item->next = head->next;
+			head->next->prev = item;
+			head->next = item;
+			item->prev = head;
+		}
 	}
 
 	static inline void list_delete (list_head *head) {
+		if (head) {
 			head->prev->next = head->next;
 			head->next->prev = head->prev;
+		}
+		head->next = head->prev = NULL;
 	}
 
 	template <typename _ValType>
