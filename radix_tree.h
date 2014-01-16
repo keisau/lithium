@@ -254,25 +254,23 @@ namespace li
 			radix_node		*slots [RT_BRANCH_FACTOR];
 
 		public:
-			radix_node () :	height (0),
-			size (0),
-			offset (0),
-			flags (RT_INDIRECT_NODE)
+			radix_node () :	parent (this),
+				height (0),
+				size (0),
+				offset (0),
+				flags (RT_INDIRECT_NODE),
+				slots ()
 			{
-				parent = this;
-				for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
-					slots[i] = NULL;
 			}
 
-			radix_node (_ValType value) : height (0),
-			size (0),
-			offset (0),
-			flags (RT_DATA_NODE),
-			node (list_node (value))
+			radix_node (_ValType value) : parent (this),
+				height (0),
+				size (0),
+				offset (0),
+				flags (RT_DATA_NODE),
+				node (list_node (value)),
+				slots ()
 			{
-				parent = this;
-				for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
-					slots[i] = NULL;
 			}
 			
 			// dfs delete
