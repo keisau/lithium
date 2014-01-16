@@ -3,9 +3,9 @@
 
 #include "lithium.h"
 #include "hash.h"
-#include "hlist.h"
 #include "list.h"
-
+#include "list.h"
+#include <stdio.h>
 namespace li
 {
 	template <typename _KeyType, typename _ValType, class _Traits = li::_naive_type_trait <_KeyType> >
@@ -17,25 +17,28 @@ namespace li
 
 			// typedefs
 		protected:
-			struct item_node
+			struct hash_node
 			{
 				_KeyType			key;
 				_ValType			value;
+				list_head			slot_head;
 				list_head			head;
+				hash_node () {}
+				hash_node (_KeyType key, _ValType value) :
+				key(key), value(value) {}
 			};
 
 			typedef typename _Traits::type_t				__hash_key_t;
 
 			// public methods
 		public:
-			hashmap () : _size (4096) {
-				_table = new hlist <item_node> [4097];
-				_table [4096] = NULL;
+			hashmap () { 
+				list_insert (&head, &tail);
+				printf ("%d\n", offsetof (hash_node, head)); 
 			}
 
 			hashmap (size_t size) : _size (size) {
-				_table = new hlist <item_node> [_size + 1];
-				_table [size] = NULL;
+				_table = new list_head [_size] ();
 			}
 
 			~hashmap () {}
@@ -44,10 +47,16 @@ namespace li
 			{
 				__hash_key_t key = _Traits ()(_key);
 				index_t _x = get_hash (_key);
-				_table [_x].insert (make_pair (key, val));
+				hash_node *node = new hash_node (_key, val);
+
+				// table slot
+				list_insert (_table + _x, &node->slot_head);
+
+				// iterator head
+				list_insert (&head, &node->head);
 			}
 
-			bool find (_KeyType _key)
+			pair <_ValType, bool> find (_KeyType _key)
 			{
 				__hash_key_t key = _Traits ()(_key);
 				index_t _x = get_hash (_key);
@@ -63,7 +72,9 @@ namespace li
 			// attributes
 		protected:
 			size_t					_size;
-			li::hlist <item_node>		*_table;
+			list_head				*_table;
+			list_head				head;
+			list_head				tail;
 		};
 }
 #endif // __LITHIUM_HASHMAP_H__
