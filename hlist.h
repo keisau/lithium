@@ -69,7 +69,8 @@ namespace li
 			if (head->next) 
 				head->next->pprev = &item->next;
 		}
-		head->next = head->pprev = NULL;
+		head->next =NULL;
+		head->pprev = NULL;
 	}
 
 } // namespace li
