@@ -26,22 +26,18 @@ const u32 _primes[16] = {
 };
 #define GOLDEN_RATIO_PRIME_32 0x9e370001UL
 #define _HASH_SHIFT_MASK		0x1f
-static inline index_t _hash (const u32 *s, u32 len)
-{
-	index_t retval = 0;
-	for (u32 i = 0; i < len; ++i)
-		retval ^= (u64) s[i] * _primes [i & _PRIME_MASK];
-	
-	return retval;
-}
 
-static inline index_t _hash (const u64 *s, u32 len)
+/**
+ * Hash 32-bit integers to an integer of the designated bits,
+ * copied from linux kernel.
+ */
+static inline u32 hash_32(u32 val, unsigned int bits)
 {
-	index_t retval = 0;
-	for (u32 i = 0; i < len; ++i)
-		retval ^= (s[i] >> (i & _HASH_SHIFT_MASK)) * _primes [i & _PRIME_MASK];
-	
-	return retval;
+	/* On some cpus multiply is faster, on others gcc will do shifts */
+	u32 retval = val * GOLDEN_RATIO_PRIME_32;
+
+	/* High bits are more random, so use them. */
+	return retval >> (32 - bits);
 }
 
 /**
@@ -71,17 +67,34 @@ static inline u64 hash_64(u64 val, unsigned int bits)
 	return retval >> (64 - bits);
 }
 
-/**
- * Hash 32-bit integers to an integer of the designated bits,
- * copied from linux kernel.
- */
-static inline u32 hash_32(u32 val, unsigned int bits)
+static inline index_t _hash (const u32 *s, u32 len)
 {
-	/* On some cpus multiply is faster, on others gcc will do shifts */
-	u32 retval = val * GOLDEN_RATIO_PRIME_32;
+	index_t retval = 0;
+	for (u32 i = 0; i < len; ++i)
+		retval ^= (u64) s[i] * _primes [i & _PRIME_MASK];
+	
+	return retval;
+}
 
-	/* High bits are more random, so use them. */
-	return retval >> (32 - bits);
+static inline index_t _hash (const u64 *s, u32 len)
+{
+	index_t retval = 0;
+	for (u32 i = 0; i < len; ++i)
+		retval ^= (s[i] >> (i & _HASH_SHIFT_MASK)) * _primes [i & _PRIME_MASK];
+	
+	return retval;
+}
+
+static inline index_t _hash (const u8 *s, u32 len) 
+{
+	index_t retval;
+	u32 size = len / sizeof (u64);
+	u32 rem = len % sizeof (u64);
+	u8 *p = (u8*) s + size * sizeof (u64);
+	retval = _hash ((u64*) s, size);
+	for (u32 i = 0; i < rem; ++i)
+		retval ^= p[i] << (i * 8 /* size of a byte */);
+	return retval;
 }
 
 template <typename _KeyType>
@@ -89,18 +102,15 @@ static inline index_t _hash (const _KeyType &key)
 {
 	index_t retval = 0;
 	u32 size = sizeof (_KeyType) / sizeof (u64);
+	u32 rem = len % sizeof (u64);
 
 	retval ^= _hash ((u64*) &key, size);
 	
 	// handle trailing bytes
-	if (sizeof (_KeyType) > size * sizeof (u64))
-	{
-		u8 *p = (u8*) (((u64*) &key) + size);
-		u32 bytesize = sizeof (_KeyType) % sizeof (u64);
-		for (u32 i = 0; i < bytesize; ++i)
-			retval ^= p[i] << (i * 8 /* size of a byte */);
-	}
-	
+	u8 *p = (u8*) (((u64*) &key) + size);
+	for (u32 i = 0; i < rem; ++i)
+		retval ^= p[i] << (i * 8 /* size of a byte */);
+
 	return retval;
 }
 
