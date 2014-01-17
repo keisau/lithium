@@ -25,14 +25,14 @@ namespace li
 	template <typename _Type>
 		struct traits 
 		{
-			typedef _Type			data_t;
-			typedef _Type			*type_t;
+			typedef _Type			type_t;
+			typedef _Type			*ptr_t;
 
-			static size_t size (type_t _in) {
-				return sizeof (data_t);
+			static size_t size (ptr_t _in) {
+				return sizeof (type_t);
 			}
 
-			static type_t key (_Type &_in) {
+			static ptr_t key (_Type &_in) {
 				return &_in;
 			}
 		};
