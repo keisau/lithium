@@ -30,13 +30,28 @@ namespace li
 		}
 	};
 
+	/**
+	 * copied from linux kernel - general list insert
+	 *
+	 * You may found the original code at:
+	 * $(linux_src)/include/linux/list.h
+	 */
+	static inline void __list_insert (list_head *item,
+			list_head *prev,
+			list_head *next)
+	{
+		next->prev = item;
+		item->next = next;
+		item->prev = prev;
+		prev->next = item;
+	}
+
 	static inline void list_insert (list_head *head, list_head *item) {
-		if (head && item) {
-			item->next = head->next;
-			head->next->prev = item;
-			head->next = item;
-			item->prev = head;
-		}
+		__list_insert (item, head, head->next);
+	}
+
+	static inline void list_push_back (list_head *head, list_head *item) {
+		__list_insert (item, head->prev, head);
 	}
 
 	static inline void list_delete (list_head *head) {
