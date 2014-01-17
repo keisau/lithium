@@ -62,7 +62,7 @@ namespace li
 			}
 
 			bool operator<= (const pair& rvalue) {
-				return !(rvalue < lhs);
+				return !(rvalue < *this);
 			}
 
 			bool operator>  (const pair& rvalue) {
@@ -108,11 +108,11 @@ namespace li
  * the typeof keyword.
  */
 #ifndef _WIN32
-#define container_of(ptr, type, member) ({							\
-		const char *__mptr = (char*) (ptr);			\
+#define container_of(ptr, type, member) ({						\
+		const char *__mptr = (char*) (ptr);						\
 		(type *) (__mptr - offsetof (type, member)); })
 #else
-#define container_of(ptr, type, member)			\
+#define container_of(ptr, type, member)							\
 	((type *) ((char*) (ptr) - offsetof (type, member)))
 #endif
 
