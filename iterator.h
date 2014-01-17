@@ -14,75 +14,106 @@
  * You should have received a copy of the GNU General Public License
  * along with lithium.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __LITHIUM_ITERATOR_H__
-#define __LITHIUM_ITERATOR_H__
+#ifndef __LITHIUM_H__
+#define __LITHIUM_H__
 
-#include <iterator>
+#include "types.h"
+
+// lithium library templates
 namespace li
 {
-	/**
-	 * list_head_iterator - use hacky container_of macro to implement high
-	 * memory efficiency iterator
-	 *
-	 * Protocol: 
-	 * 1. _Class must include a member variable head of type list_head.
-	 * 2. _Class must include a member variable value of type _ValType.
-	 *
-	 * Assumption:
-	 * 1. _Class is a POD type (for using container_of)
-	 * 2. _ValType provides the operators required
-	 */
-	template <class _Class, typename _ValType>
-	struct list_head_iterator :
-		public std::iterator <std::bidirectional_iterator_tag, _ValType>
-	{
-		list_head	*p;
+	template <typename _Type>
+		struct traits 
+		{
+			typedef _Type			type_t;
+			typedef _Type			*ptr_t;
 
-		// constructors
-		list_head_iterator () : p (NULL) {}
-		list_head_iterator (const list_head_iterator &iter) : p (iter.p) {}
-		list_head_iterator (list_head *p) : p (p) {}
+			static size_t get_size (ptr_t _in) {
+				return sizeof (type_t);
+			}
 
-		// operators
-		list_head_iterator& operator= (const list_head_iterator &iter) {
-			p = iter.p;
-			return *this;
-		}
+			static ptr_t get_key (_Type &_in) {
+				return &_in;
+			}
+		};
 
-		list_head_iterator& operator++ () {
-			p = p->next;
-			return *this;
-		}
+#pragma pack (push, 1)
+	template <typename _Type1, typename _Type2>
+		struct pair
+		{
+			_Type1		first;
+			_Type2		second;
+			pair& operator= (const pair& pr) { 
+				first = pr.first; second = pr.second;
+				return *this;
+			}
 
-		list_head_iterator operator++ (int) {
-			list_head_iterator retval = list_head_iterator (*this);
-			p = p->next;
+			bool operator== (const pair& rvalue) {
+				return first == rvalue.first && second == rvalue.second;
+			}
+
+			bool operator!= (const pair& rvalue) {
+				return !(*this == rvalue);
+			}
+
+			bool operator<  (const pair& rvalue) { 
+				return first < rvalue.first 
+					|| (rvalue.first >= first && second < rvalue.second); 
+			}
+
+			bool operator<= (const pair& rvalue) {
+				return !(rvalue < lhs);
+			}
+
+			bool operator>  (const pair& rvalue) {
+				return rvalue < *this; 
+			}
+
+			bool operator>= (const pair& rvalue) {
+				return !(*this < rvalue); 
+			}
+		};
+
+#pragma pack (pop)
+
+	template <typename _Type1, typename _Type2>
+		li::pair <_Type1, _Type2> make_pair (_Type1 x, _Type2 y)
+		{
+			li::pair<_Type1, _Type2> retval;
+			retval.first = x;
+			retval.second = y;
 			return retval;
 		}
-
-		list_head_iterator& operator-- () {
-			p = p->prev;
-			return *this;
-		}
-
-		list_head_iterator operator-- (int) {
-			list_head_iterator retval = list_head_iterator (*this);
-			p = p->prev;
-			return retval;
-		}
-
-		bool operator== (const list_head_iterator &rvalue) const { return p == rvalue.p; }
-		bool operator!= (const list_head_iterator &rvalue) const { return p != rvalue.p; }
-		_ValType& operator* () const {
-			_Class *obj = container_of (p, _Class, head);
-			return obj->value;
-		}
-
-		_ValType* operator-> () const {
-			_Class *obj = container_of (p, _Class, head);
-			return &obj->value;
-		}
-	};
 }
 
-#endif // __LITHIUM_ITERATOR_H__
+// utility functions
+namespace li
+{
+	static inline index_t div_round_up (index_t ll, index_t d)
+	{
+		index_t tmp = ll + d - 1;
+		return tmp / d;
+	}
+}
+
+// utility macros
+/**
+ * The offsetof macro - hoped to eliminate Winvalid-offsetof warning
+ */
+#undef offsetof
+#define offsetof(type, member) ((size_t) &(((type *)0)->member))
+
+/**
+ * The container_of macro - modified to support compilers without
+ * the typeof keyword.
+ */
+#ifndef _WIN32
+#define container_of(ptr, type, member) ({							\
+		const char *__mptr = (char*) (ptr);			\
+		(type *) (__mptr - offsetof (type, member)); })
+#else
+#define container_of(ptr, type, member)			\
+	((type *) ((char*) (ptr) - offsetof (type, member)))
+#endif
+
+#endif // __LITHIUM_H__
