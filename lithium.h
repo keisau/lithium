@@ -23,12 +23,17 @@
 namespace li
 {
 	template <typename _Type>
-		struct _naive_type_trait 
+		struct traits 
 		{
-			typedef _Type			type_t;
-			typedef _Type			*ptr_t;
-			type_t operator() (_Type _in) {
-				return _in;
+			typedef _Type			data_t;
+			typedef _Type			*type_t;
+
+			static size_t size (type_t _in) {
+				return sizeof (data_t);
+			}
+
+			static type_t key (_Type &_in) {
+				return &_in;
 			}
 		};
 
@@ -40,6 +45,7 @@ namespace li
 			_Type2		second;
 		};
 #pragma pack (pop)
+
 	template <typename _Type1, typename _Type2>
 		li::pair <_Type1, _Type2> make_pair (_Type1 x, _Type2 y)
 		{
@@ -61,6 +67,12 @@ namespace li
 }
 
 // utility macros
+/**
+ * The offsetof macro - hoped to eliminate Winvalid-offsetof warning
+ */
+#undef offsetof
+#define offsetof(type, member) ((size_t) &(((type *)0)->member))
+
 /**
  * The container_of macro - modified to fit into non-gnu compilers without
  * the typeof keyword.
