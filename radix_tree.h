@@ -35,7 +35,6 @@
 #include "lithium.h"
 #include "list.h"
 #include "iterator.h"
-#include <stdio.h>
 namespace li
 {
 	/**
@@ -47,7 +46,7 @@ namespace li
 #define RT_INDIRECT_NODE		0
 #define RT_DATA_NODE			1
 
-//	template <typename _ValType>
+	//	template <typename _ValType>
 
 
 	/**
@@ -57,9 +56,9 @@ namespace li
 		class radix_tree
 		{
 		protected:
-	/**
-	 * radix tree node
-	 */
+			/**
+			 * radix tree node
+			 */
 			struct radix_node
 			{
 				_ValType		value;
@@ -75,14 +74,14 @@ namespace li
 				radix_node		*slots [RT_BRANCH_FACTOR];
 
 				radix_node () :	parent (this),
-					height (0),
-					size (0),
-					offset (0),
-					flags (RT_INDIRECT_NODE),
-					slots () {}
+				height (0),
+				size (0),
+				offset (0),
+				flags (RT_INDIRECT_NODE),
+				slots () {}
 
 				radix_node (_ValType value) : flags (RT_DATA_NODE),
-					value (value) {}
+				value (value) {}
 
 				// dfs delete
 				~radix_node ()
@@ -104,6 +103,7 @@ namespace li
 
 			// functions
 		public:
+			// default constructor
 			radix_tree ()
 			{
 				rt_root = new radix_node ();
@@ -134,7 +134,7 @@ namespace li
 			iterator begin () { return iterator (head.next); }
 			iterator end () { return iterator (&tail); }
 
-			std::pair<iterator, bool> insert (index_t key, _ValType val);
+			li::pair<iterator, bool> insert (index_t key, _ValType val);
 			iterator find (index_t key) const;
 			u32 erase (const index_t &key);
 			void erase (const iterator &iter);
@@ -179,17 +179,15 @@ namespace li
 	 * insert key-value pair
 	 */
 	template <typename _ValType>
-		std::pair<typename radix_tree<_ValType>::iterator, bool>
+		li::pair<typename radix_tree<_ValType>::iterator, bool>
 		radix_tree<_ValType>::insert (index_t key, _ValType val)
 		{
-			std::pair<iterator, bool> retval;
+			li::pair<iterator, bool> retval;
 			radix_node *parent, *slot, **slots;
 			register u32 height, index, shift;
 
 			while (key > max_index[rt_root->height])
-			{
 				rt_root = extend ();
-			}
 
 			parent = rt_root;
 			slot = NULL;
@@ -317,9 +315,8 @@ out_not_found:
 			radix_node *p_node = r_node->parent;
 
 			/**
-			* erase item in parent's slots
-			*/
-			printf ("DEBUG : %d\n", r_node->offset);
+			 * erase item in parent's slots
+			 */
 			p_node->slots [r_node->offset] = NULL;
 			--p_node->size;
 			if (p_node->size == 0)
