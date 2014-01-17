@@ -43,8 +43,6 @@ namespace li
 #define RT_BRANCH_FACTOR_BIT	(6)
 #define RT_BRANCH_FACTOR		(1 << RT_BRANCH_FACTOR_BIT)
 #define RT_BRANCH_INDEX_MASK	(RT_BRANCH_FACTOR - 1)
-#define RT_INDIRECT_NODE		0
-#define RT_DATA_NODE			1
 
 	/**
 	 * radix_tree container
@@ -63,7 +61,6 @@ namespace li
 				u16				height;		// height of subtree
 				u16				size;		// number of occupied slots
 				u16				offset;		// parent->slots[offset] == this
-				u16				flags;
 
 				// linked list for O(n) stepwise iteration (BFS)
 				list_head		head;
@@ -82,7 +79,7 @@ namespace li
 				~radix_node ()
 				{
 					radix_node *slot;
-					if (flags == RT_INDIRECT_NODE)
+					if (height >= 0)
 						for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
 						{
 							slot = slots[i];
