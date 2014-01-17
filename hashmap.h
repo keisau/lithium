@@ -12,6 +12,7 @@ namespace li
 		{
 			// typedefs
 		protected:
+			typedef typename _Traits::ptr_t				__hash_key_t;
 			struct hash_node
 			{
 				_KeyType			key;
@@ -20,10 +21,8 @@ namespace li
 				list_head			head;
 				hash_node () {}
 				hash_node (_KeyType key, _ValType value) :
-				key(key), value(value) {}
+					key(key), value(value) {}
 			};
-
-			typedef typename _Traits::ptr_t				__hash_key_t;
 
 		public:
 			typedef li::list_head_iterator <hash_node, _ValType> iterator;
@@ -37,29 +36,64 @@ namespace li
 
 			~hashmap () {}
 
-			void insert (_KeyType _key, _ValType val)
+			li::pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
 			{
-				__hash_key_t key = _Traits::key(_key);
-				hash_node *node = new hash_node (_key, val);
-				index_t _x = _hash ((u8 *)key, _Traits::size (key)) % _size;
+				li::pair <iterator, bool> retval;
+				__hash_key_t key = _Traits::get_key (_key);
+				index_t _x = _hash ((u8 *)key, _Traits::get_size (key)) % _size;
+				hash_node *node;
 
-				// table slot
+				/* list_for_each_entry */
+				for (list_head *root = _table + _x, *p = root->next;
+						p != root; 
+						p = p->next)
+				{
+					node = container_of (p, hash_node, slot_head);
+					if (node->key == _key) {
+						retval.first = iterator (&node->head);
+						retval.second = false;
+						goto out;
+					}
+				}
+
+				/* key not found, insert */
+				node = new hash_node (_key, val);
 				list_insert (_table + _x, &node->slot_head);
-
-				// iterator head
 				list_insert (&head, &node->head);
+				retval.first = iterator (&node->head);
+				retval.second = true;
+out:
+				return retval;	
 			}
 
-			pair <_ValType, bool> find (_KeyType _key)
+			iterator find (const _KeyType &_key)
 			{
-				__hash_key_t key = _Traits::(_key);
-				index_t _x;
+				__hash_key_t key = _Traits::get_key (_key);
+				index_t _x = _hash ((u8 *)key, _Traits::get_size (key)) % _size;
+				hash_node *node;
+
+				/* list_for_each_entry */
+				for (list_head *root = _table + _x, *p = root->next;
+						p != root; 
+						p = p->next)
+				{
+					node = container_of (p, hash_node, slot_head);
+					// found
+					if (node->key == _key) {
+						return iterator (&node->head);
+					}
+				}
+
+				// not found
+				return end ();
 			}
+
+			_ValType& operator[] (const _KeyType &key) { return *(find (key)); }
 
 			iterator begin () {
 				return iterator (head.next);
 			}
-			
+
 			iterator end () {
 				return iterator (&tail);
 			}
