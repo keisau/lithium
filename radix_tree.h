@@ -47,47 +47,8 @@ namespace li
 #define RT_INDIRECT_NODE		0
 #define RT_DATA_NODE			1
 
-	/**
-	 * radix tree node
-	 */
-	template <typename _ValType>
-	struct radix_node
-	{
-		_ValType		value;
-		radix_node		*parent;	// parent slot
-		u16				height;		// height of subtree
-		u16				size;		// number of occupied slots
-		u16				offset;		// parent->slots[offset] == this
-		u16				flags;
+//	template <typename _ValType>
 
-		// linked list for O(n) stepwise iteration (BFS)
-		list_head		head;
-
-		radix_node		*slots [RT_BRANCH_FACTOR];
-
-		radix_node () :	parent (this),
-		height (0),
-		size (0),
-		offset (0),
-		flags (RT_INDIRECT_NODE),
-		slots () {}
-
-		radix_node (_ValType value) : flags (RT_DATA_NODE),
-		value (value) {}
-
-		// dfs delete
-		~radix_node ()
-		{
-			radix_node *slot;
-			if (flags == RT_INDIRECT_NODE)
-				for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
-				{
-					slot = slots[i];
-					if (slot)
-						delete slot;
-				}
-		}
-	};	
 
 	/**
 	 * radix_tree container
@@ -95,16 +56,57 @@ namespace li
 	template <typename _ValType>
 		class radix_tree
 		{
+		protected:
+	/**
+	 * radix tree node
+	 */
+			struct radix_node
+			{
+				_ValType		value;
+				radix_node		*parent;	// parent slot
+				u16				height;		// height of subtree
+				u16				size;		// number of occupied slots
+				u16				offset;		// parent->slots[offset] == this
+				u16				flags;
+
+				// linked list for O(n) stepwise iteration (BFS)
+				list_head		head;
+
+				radix_node		*slots [RT_BRANCH_FACTOR];
+
+				radix_node () :	parent (this),
+					height (0),
+					size (0),
+					offset (0),
+					flags (RT_INDIRECT_NODE),
+					slots () {}
+
+				radix_node (_ValType value) : flags (RT_DATA_NODE),
+					value (value) {}
+
+				// dfs delete
+				~radix_node ()
+				{
+					radix_node *slot;
+					if (flags == RT_INDIRECT_NODE)
+						for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
+						{
+							slot = slots[i];
+							if (slot)
+								delete slot;
+						}
+				}
+			};	
 			// types
 		public:
-			typedef li::list_head_iterator <radix_node<_ValType>, _ValType> iterator;
-			friend class li::list_head_iterator <radix_node<_ValType>, _ValType>;
+			typedef li::list_head_iterator <radix_node, _ValType> iterator;
+			friend class li::list_head_iterator <radix_node, _ValType>;
 
 			// functions
 		public:
 			radix_tree ()
 			{
-				rt_root = new radix_node<_ValType> ();
+				rt_root = new radix_node ();
 				list_insert (&head, &tail);
 
 				// initialize max height
@@ -124,7 +126,7 @@ namespace li
 			// dfs
 			~radix_tree ()
 			{
-				radix_node<_ValType> *node = rt_root;
+				radix_node *node = rt_root;
 				if (node)
 					delete node;
 			}
@@ -143,9 +145,9 @@ namespace li
 			}
 
 		protected:
-			radix_node<_ValType> * extend ()
+			radix_node * extend ()
 			{	// only happen on the root
-				radix_node<_ValType> * retval = new radix_node<_ValType> ();
+				radix_node * retval = new radix_node ();
 				retval->height = rt_root->height + 1;
 				retval->size = 1;
 				retval->slots[0] = rt_root;
@@ -153,11 +155,11 @@ namespace li
 				return retval;
 
 			}
-			void shrink (radix_node<_ValType> *node)		
+			void shrink (radix_node *node)		
 			{	// only happen on the root
 				while (node != rt_root && node->size == 0)
 				{
-					radix_node<_ValType> * parent = node->parent;
+					radix_node * parent = node->parent;
 					parent->slots[node->offset] = NULL;
 					delete node;
 					node = parent;
@@ -166,7 +168,7 @@ namespace li
 
 			// member fields
 		protected:
-			radix_node<_ValType>		*rt_root;
+			radix_node		*rt_root;
 			list_head		head;		// begin()
 			list_head		tail;		// end()
 			u32				max_height;
@@ -181,7 +183,7 @@ namespace li
 		radix_tree<_ValType>::insert (index_t key, _ValType val)
 		{
 			std::pair<iterator, bool> retval;
-			radix_node<_ValType> *parent, *slot, **slots;
+			radix_node *parent, *slot, **slots;
 			register u32 height, index, shift;
 
 			while (key > max_index[rt_root->height])
@@ -191,7 +193,7 @@ namespace li
 
 			parent = rt_root;
 			slot = NULL;
-			slots = (radix_node<_ValType> **)rt_root->slots;
+			slots = (radix_node **)rt_root->slots;
 			height = rt_root->height;
 			index = 0;
 			shift = (height) * RT_BRANCH_FACTOR_BIT;
@@ -202,7 +204,7 @@ namespace li
 				slot = slots[index];
 				if (slot == NULL)
 				{	// extend slot
-					slot = new radix_node<_ValType> ();
+					slot = new radix_node ();
 					slot->height = height - 1;
 					slot->parent = parent;
 					slot->offset = index;
@@ -211,7 +213,7 @@ namespace li
 				}
 
 				// move down a level
-				slots = (radix_node<_ValType> **) slot->slots;
+				slots = (radix_node **) slot->slots;
 				parent = slot;
 				shift -= RT_BRANCH_FACTOR_BIT;
 				--height;
@@ -227,7 +229,7 @@ namespace li
 			retval.second = slots[index] == NULL;
 			if (retval.second)
 			{
-				radix_node<_ValType> *p = new radix_node<_ValType> (val);
+				radix_node *p = new radix_node (val);
 				p->parent = parent;
 				slots[index] = p;
 			}
@@ -249,7 +251,7 @@ namespace li
 		radix_tree<_ValType>::find (index_t key) const
 		{
 			const list_head *retval;
-			radix_node<_ValType> *p, **slots;
+			radix_node *p, **slots;
 			register u16 height, shift;
 			register u32 index;
 
@@ -257,30 +259,25 @@ namespace li
 				goto out_not_found;
 
 			//slot = rt_root;
-			slots = (radix_node<_ValType> **)rt_root->slots;
+			slots = (radix_node **)rt_root->slots;
 			height = rt_root->height;
 			shift = (height) * RT_BRANCH_FACTOR_BIT;
-			while (height > 1)
+			while (height > 0)
 			{
 				index = (key >> shift) & (RT_BRANCH_INDEX_MASK);
-				if (slots[index] == NULL)
+				p = slots[index];
+				if (p == NULL)
 				{	// not found
 					goto out_not_found;
 				}
 
-				slots = (radix_node<_ValType> **) slots[index]->slots;
+				slots = (radix_node **) slots[index]->slots;
 				shift -= RT_BRANCH_FACTOR_BIT;
 				--height;
 			}
 
-			// arrived at substree height = 0
-			index = (key >> shift) & (RT_BRANCH_INDEX_MASK);
-
-			p = slots[index];
-			if (p == NULL)
-				goto out_not_found;
-			retval = &slots[index]->head;
-
+			// arrived at substree height = 0, found
+			retval = &p->head;
 out:
 			return iterator ((list_head *) retval);
 
@@ -309,15 +306,15 @@ out_not_found:
 		void radix_tree<_ValType>::erase (const iterator &iter)
 		{
 			list_head * tmp = iter.p;
-			radix_node<_ValType> *r_node;
+			radix_node *r_node;
 #ifndef _WIN32
-			r_node = container_of (tmp, radix_node<_ValType>, head);
+			r_node = container_of (tmp, radix_node, head);
 #else
 			char * _p = (char*) iter.p;
-			r_node = (radix_node<_ValType>*)(_p - offsetof (radix_node<_ValType>, head));
+			r_node = (radix_node*)(_p - offsetof (radix_node, head));
 #endif
 
-			radix_node<_ValType> *p_node = r_node->parent;
+			radix_node *p_node = r_node->parent;
 
 			/**
 			* erase item in parent's slots
