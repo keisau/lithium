@@ -43,7 +43,37 @@ namespace li
 		{
 			_Type1		first;
 			_Type2		second;
+			pair& operator= (const pair& pr) { 
+				first = pr.first; second = pr.second;
+				return *this;
+			}
+
+			bool operator== (const pair& rvalue) {
+				return first == rvalue.first && second == rvalue.second;
+			}
+
+			bool operator!= (const pair& rvalue) {
+				return !(*this == rvalue);
+			}
+
+			bool operator<  (const pair& rvalue) { 
+				return first < rvalue.first 
+					|| (rvalue.first >= first && second < rvalue.second); 
+			}
+
+			bool operator<= (const pair& rvalue) {
+				return !(rvalue < lhs);
+			}
+
+			bool operator>  (const pair& rvalue) {
+				return rvalue < *this; 
+			}
+
+			bool operator>= (const pair& rvalue) {
+				return !(*this < rvalue); 
+			}
 		};
+
 #pragma pack (pop)
 
 	template <typename _Type1, typename _Type2>
@@ -74,7 +104,7 @@ namespace li
 #define offsetof(type, member) ((size_t) &(((type *)0)->member))
 
 /**
- * The container_of macro - modified to fit into non-gnu compilers without
+ * The container_of macro - modified to support compilers without
  * the typeof keyword.
  */
 #ifndef _WIN32
