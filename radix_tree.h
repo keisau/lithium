@@ -46,9 +46,6 @@ namespace li
 #define RT_INDIRECT_NODE		0
 #define RT_DATA_NODE			1
 
-	//	template <typename _ValType>
-
-
 	/**
 	 * radix_tree container
 	 */
@@ -77,11 +74,9 @@ namespace li
 				height (0),
 				size (0),
 				offset (0),
-				flags (RT_INDIRECT_NODE),
 				slots () {}
 
-				radix_node (_ValType value) : flags (RT_DATA_NODE),
-				value (value) {}
+				radix_node (_ValType value) : value (value) {}
 
 				// dfs delete
 				~radix_node ()
@@ -95,7 +90,8 @@ namespace li
 								delete slot;
 						}
 				}
-			};	
+			};
+
 			// types
 		public:
 			typedef li::list_head_iterator <radix_node, _ValType> iterator;
@@ -123,7 +119,7 @@ namespace li
 				}
 			}
 
-			// dfs
+			// dfs start delete
 			~radix_tree ()
 			{
 				radix_node *node = rt_root;
@@ -134,14 +130,151 @@ namespace li
 			iterator begin () { return iterator (head.next); }
 			iterator end () { return iterator (&tail); }
 
-			li::pair<iterator, bool> insert (index_t key, _ValType val);
-			iterator find (index_t key) const;
-			u32 erase (const index_t &key);
-			void erase (const iterator &iter);
+			/**
+			 * Insert key-value pair
+			 */
+			li::pair<iterator, bool> insert (index_t key, _ValType val)
+
+			{
+				li::pair<iterator, bool> retval;
+				radix_node *parent, *slot, **slots;
+				register u32 height, index, shift;
+
+				while (key > max_index[rt_root->height])
+					rt_root = extend ();
+
+				parent = rt_root;
+				slot = NULL;
+				slots = (radix_node **)rt_root->slots;
+				height = rt_root->height;
+				shift = (height) * RT_BRANCH_FACTOR_BIT;
+				while (height > 0)
+				{
+					// retrieve array index in current level
+					index = (key >> shift) & (RT_BRANCH_INDEX_MASK);
+					slot = slots[index];
+					if (slot == NULL)
+					{	// extend slot
+						slot = new radix_node ();
+						slot->height = height - 1;
+						slot->parent = parent;
+						slot->offset = index;
+						slots[index] = slot;
+						parent->size++;
+					}
+
+					// move down a level
+					slots = (radix_node **) slot->slots;
+					parent = slot;
+					shift -= RT_BRANCH_FACTOR_BIT;
+					--height;
+				}
+
+				// ready to insert value after DFS
+				index = key & (RT_BRANCH_INDEX_MASK);
+
+				// insert entry
+				parent->size++;
+
+				// check for existence
+				retval.second = slots[index] == NULL;
+				if (retval.second)
+				{
+					radix_node *p = new radix_node (val);
+					p->parent = parent;
+					p->offset = index;
+					p->height = -1;
+					slots[index] = p;
+				}
+
+				// insert to the iteration list
+				list_insert (&head, &slots[index]->head);
+
+				// return iterator with the destination item (no matter new/old)
+				retval.first = iterator (&slots[index]->head);
+				
+				return retval;
+			}
+
+			/**
+			 * find()
+			 */
+			iterator find (index_t key) const
+			{
+				const list_head *retval;
+				radix_node *slot, **slots;
+				register u32 height, index, shift;
+
+				if (key > max_index[rt_root->height])
+					goto out_not_found;
+
+				slot = NULL;
+				slots = (radix_node **)rt_root->slots;
+				height = rt_root->height;
+				shift = (height) * RT_BRANCH_FACTOR_BIT;
+				while (height > 0)
+				{
+					// retrieve array index in current level
+					index = (key >> shift) & (RT_BRANCH_INDEX_MASK);
+					slot = slots[index];
+					if (slot == NULL)
+					{	// not found
+						goto out_not_found;
+					}
+
+					// move down a level
+					slots = (radix_node **) slot->slots;
+					shift -= RT_BRANCH_FACTOR_BIT;
+					--height;
+				}
+
+				// ready to insert value after DFS
+				index = key & (RT_BRANCH_INDEX_MASK);
+
+				slot = slots[index];
+				retval = &slot->head;
+out:
+				return iterator ((list_head *) retval);
+
+out_not_found:
+				retval = &tail;
+				goto out;
+			}
+
+			/**
+			 * find and erase a key
+			 */
+			u32 erase (const index_t &key)
+			{
+				iterator it = find (key);
+				if (it == end ())
+					return 0;
+				erase (it);
+				return 1;
+			}
+
+			/**
+			 * erase using an iterator
+			 */
+			void erase (const iterator &iter)
+			{
+				list_head * tmp = iter.p;
+				radix_node *r_node = container_of (tmp, radix_node, head);
+				radix_node *p_node = r_node->parent;
+
+				/**
+				 * erase item in parent's slots
+				 */
+				p_node->slots [r_node->offset] = NULL;
+				--p_node->size;
+				if (p_node->size == 0)
+					shrink (p_node);
+				delete r_node;
+			}
 
 			_ValType& operator[] (index_t key)
 			{
-				return (_ValType) *(find (key));
+				return *(find (key));
 			}
 
 		protected:
@@ -174,154 +307,5 @@ namespace li
 			u32				max_height;
 			index_t			max_index[sizeof(index_t) << 3 /* size of a byte */];
 		};
-
-	/**
-	 * insert key-value pair
-	 */
-	template <typename _ValType>
-		li::pair<typename radix_tree<_ValType>::iterator, bool>
-		radix_tree<_ValType>::insert (index_t key, _ValType val)
-		{
-			li::pair<iterator, bool> retval;
-			radix_node *parent, *slot, **slots;
-			register u32 height, index, shift;
-
-			while (key > max_index[rt_root->height])
-				rt_root = extend ();
-
-			parent = rt_root;
-			slot = NULL;
-			slots = (radix_node **)rt_root->slots;
-			height = rt_root->height;
-			index = 0;
-			shift = (height) * RT_BRANCH_FACTOR_BIT;
-			while (height > 0)
-			{
-				// retrieve array index in current level
-				index = (key >> shift) & (RT_BRANCH_INDEX_MASK);
-				slot = slots[index];
-				if (slot == NULL)
-				{	// extend slot
-					slot = new radix_node ();
-					slot->height = height - 1;
-					slot->parent = parent;
-					slot->offset = index;
-					slots[index] = slot;
-					parent->size++;
-				}
-
-				// move down a level
-				slots = (radix_node **) slot->slots;
-				parent = slot;
-				shift -= RT_BRANCH_FACTOR_BIT;
-				--height;
-			}
-
-			// ready to insert value after DFS
-			index = key & (RT_BRANCH_INDEX_MASK);
-
-			// insert entry
-			parent->size++;
-
-			// check for existence
-			retval.second = slots[index] == NULL;
-			if (retval.second)
-			{
-				radix_node *p = new radix_node (val);
-				p->parent = parent;
-				slots[index] = p;
-			}
-
-			// insert to the iteration list
-			list_insert (&head, &slots[index]->head);
-			//slots[index]->head.container = parent;
-
-			// return iterator with the destination item (no matter new/old)
-			retval.first = iterator (&slots[index]->head);
-			return retval;
-		}
-
-	/**
-	 * find by key, returning iterator
-	 */
-	template <typename _ValType>
-		typename radix_tree<_ValType>::iterator
-		radix_tree<_ValType>::find (index_t key) const
-		{
-			const list_head *retval;
-			radix_node *p, **slots;
-			register u16 height, shift;
-			register u32 index;
-
-			if (key > max_index[rt_root->height])
-				goto out_not_found;
-
-			//slot = rt_root;
-			slots = (radix_node **)rt_root->slots;
-			height = rt_root->height;
-			shift = (height) * RT_BRANCH_FACTOR_BIT;
-			while (height > 0)
-			{
-				index = (key >> shift) & (RT_BRANCH_INDEX_MASK);
-				p = slots[index];
-				if (p == NULL)
-				{	// not found
-					goto out_not_found;
-				}
-
-				slots = (radix_node **) slots[index]->slots;
-				shift -= RT_BRANCH_FACTOR_BIT;
-				--height;
-			}
-
-			// arrived at substree height = 0, found
-			retval = &p->head;
-out:
-			return iterator ((list_head *) retval);
-
-out_not_found:
-			retval = &tail;
-			goto out;
-		}
-
-	/**
-	 * erase by key
-	 */
-	template <typename _ValType>
-		u32 radix_tree<_ValType>::erase (const index_t &key)
-		{
-			iterator it = find (key);
-			if (it == end ())
-				return 0;
-			erase (it);
-			return 1;
-		}
-
-	/**
-	 * erase by iterator
-	 */
-	template <typename _ValType>
-		void radix_tree<_ValType>::erase (const iterator &iter)
-		{
-			list_head * tmp = iter.p;
-			radix_node *r_node;
-#ifndef _WIN32
-			r_node = container_of (tmp, radix_node, head);
-#else
-			char * _p = (char*) iter.p;
-			r_node = (radix_node*)(_p - offsetof (radix_node, head));
-#endif
-
-			radix_node *p_node = r_node->parent;
-
-			/**
-			 * erase item in parent's slots
-			 */
-			p_node->slots [r_node->offset] = NULL;
-			--p_node->size;
-			if (p_node->size == 0)
-				shrink (p_node);
-			delete r_node;
-		}
 } // namespace li
 #endif // __LITHIUM_RADIX_TREE_H__
