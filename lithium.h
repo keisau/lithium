@@ -28,12 +28,12 @@ namespace li
 			typedef _Type			type_t;
 			typedef _Type			*ptr_t;
 
-			static size_t size (ptr_t _in) {
+			static size_t get_size (const ptr_t _in) {
 				return sizeof (type_t);
 			}
 
-			static ptr_t key (_Type &_in) {
-				return &_in;
+			static ptr_t get_key (const _Type &_in) {
+				return  (ptr_t) &_in;
 			}
 		};
 
