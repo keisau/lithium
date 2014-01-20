@@ -105,7 +105,6 @@ namespace li
 			radix_tree ()
 			{
 				rt_root = new radix_node ();
-				list_insert (&head, &tail);
 
 				// initialize max height
 				max_height = (u32) (div_round_up (sizeof (index_t) << 3,
@@ -130,7 +129,7 @@ namespace li
 			}
 
 			iterator begin () { return iterator (head.next); }
-			iterator end () { return iterator (&tail); }
+			iterator end () { return iterator (&head); }
 
 			/**
 			 * Insert key-value pair
@@ -238,7 +237,7 @@ out:
 				return iterator ((list_head *) retval);
 
 out_not_found:
-				retval = &tail;
+				retval = &head;
 				goto out;
 			}
 
@@ -303,8 +302,7 @@ out_not_found:
 			// member fields
 		protected:
 			radix_node		*rt_root;
-			list_head		head;		// begin()
-			list_head		tail;		// end()
+			list_head		head;		// begin() & end()
 			u32				max_height;
 			index_t			max_index[sizeof(index_t) << 3 /* size of a byte */];
 		};
