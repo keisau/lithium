@@ -95,7 +95,7 @@ out:
 			}
 
 			iterator end () {
-				return iterator (&tail);
+				return iterator (&head);
 			}
 
 			// protected methods
@@ -106,7 +106,6 @@ out:
 			 */
 			void _post_ctor () {
 				_table = new list_head [_size] ();
-				list_insert (&head, &tail);
 			}
 
 			// attributes
@@ -114,7 +113,6 @@ out:
 			size_t					_size;
 			list_head				*_table;
 			list_head				head;
-			list_head				tail;
 		};
 }
 #endif // __LITHIUM_HASHMAP_H__
