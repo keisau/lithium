@@ -39,8 +39,8 @@ namespace li
 			li::pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
 			{
 				li::pair <iterator, bool> retval;
-				__hash_ptr_t keyptr = _Traits::get_key (_key);
-				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (key)) % _size;
+				__hash_ptr_t keyptr = _Traits::get_key_ptr (_key);
+				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % _size;
 				hash_node *node;
 
 				/* list_for_each_entry */
@@ -68,8 +68,8 @@ out:
 
 			iterator find (const _KeyType &_key)
 			{
-				__hash_ptr_t keyptr = _Traits::get_key (_key);
-				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (key)) % _size;
+				__hash_ptr_t keyptr = _Traits::get_key_ptr (_key);
+				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % _size;
 				hash_node *node;
 
 				/* list_for_each_entry */

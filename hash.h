@@ -102,6 +102,7 @@ static inline index_t _hash (const _KeyType &key)
 {
 	index_t retval = 0;
 	u32 size = sizeof (_KeyType) / sizeof (u64);
+	u32 len = sizeof (key);
 	u32 rem = len % sizeof (u64);
 
 	retval ^= _hash ((u64*) &key, size);

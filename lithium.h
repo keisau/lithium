@@ -28,11 +28,15 @@ namespace li
 			typedef _Type			type_t;
 			typedef _Type			*ptr_t;
 
-			static size_t get_size (const ptr_t _in) {
+			static size_t get_size (const _Type _in) {
 				return sizeof (type_t);
 			}
 
-			static ptr_t get_key (const _Type &_in) {
+			static type_t get_key (const _Type &_in) {
+				return (type_t) _in;
+			}
+			
+			static ptr_t get_key_ptr (const _Type &_in) {
 				return  (ptr_t) &_in;
 			}
 		};
@@ -73,7 +77,6 @@ namespace li
 				return !(*this < rvalue); 
 			}
 		};
-
 #pragma pack (pop)
 
 	template <typename _Type1, typename _Type2>
