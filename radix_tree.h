@@ -69,16 +69,16 @@ namespace li
 				radix_node		*slots [RT_BRANCH_FACTOR];
 
 				radix_node () :	parent (this),
-				height (0),
-				size (0),
-				offset (0),
-				slots () {}
+						   height (0),
+						   size (0),
+						   offset (0),
+						   slots () {}
 
 				radix_node (_ValType value) : parent (this),
-				height (-1),
-				size (1),
-				offset (0),
-				value (value) {}
+						   height (-1),
+						   size (1),
+						   offset (0),
+						   value (value) {}
 
 				// dfs delete
 				~radix_node ()
@@ -193,7 +193,7 @@ namespace li
 
 				// return iterator with the destination item (no matter new/old)
 				retval.first = iterator (&slots[index]->head);
-				
+
 				return retval;
 			}
 
