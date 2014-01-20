@@ -13,18 +13,23 @@ namespace li
 			// typedefs
 		protected:
 			typedef typename _Traits::ptr_t				__hash_ptr_t;
+
+			/**
+			 * A POD struct, hope it is safe for using container_of
+			 */
 			struct hash_node
 			{
 				_KeyType			key;
 				_ValType			value;
-				list_head			slot_head;
-				list_head			head;
+				list_head			slot_head;			// chaining list_head
+				list_head			head;				// for iterator
 				hash_node () {}
 				hash_node (_KeyType key, _ValType value) :
 					key(key), value(value) {}
 			};
 
 		public:
+			// iterator
 			typedef li::list_head_iterator <hash_node, _ValType> iterator;
 			friend class li::list_head_iterator <hash_node, _ValType>;
 
@@ -48,7 +53,11 @@ namespace li
 						p = p->next)
 				{
 					node = container_of (p, hash_node, slot_head);
+					/**
+					 * depends on equality operator of the key type
+					 */
 					if (node->key == _key) {
+						// found
 						return li::make_pair (iterator (&node->head), false);
 					}
 				}
@@ -72,8 +81,11 @@ namespace li
 						p = p->next)
 				{
 					node = container_of (p, hash_node, slot_head);
-					// found
+					/**
+					 * depends on equality operator of the key type
+					 */
 					if (node->key == _key) {
+						// found
 						return iterator (&node->head);
 					}
 				}
