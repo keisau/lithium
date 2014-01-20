@@ -38,7 +38,6 @@ namespace li
 
 			li::pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
 			{
-				li::pair <iterator, bool> retval;
 				__hash_ptr_t keyptr = _Traits::get_key_ptr (_key);
 				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % _size;
 				hash_node *node;
@@ -50,9 +49,7 @@ namespace li
 				{
 					node = container_of (p, hash_node, slot_head);
 					if (node->key == _key) {
-						retval.first = iterator (&node->head);
-						retval.second = false;
-						goto out;
+						return li::make_pair (iterator (&node->head), false);
 					}
 				}
 
@@ -60,10 +57,7 @@ namespace li
 				node = new hash_node (_key, val);
 				list_insert (_table + _x, &node->slot_head);
 				list_insert (&head, &node->head);
-				retval.first = iterator (&node->head);
-				retval.second = true;
-out:
-				return retval;	
+				return li::make_pair (iterator (&node->head), true);
 			}
 
 			iterator find (const _KeyType &_key)
