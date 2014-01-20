@@ -35,6 +35,7 @@
 #include "lithium.h"
 #include "list.h"
 #include "iterator.h"
+
 namespace li
 {
 	/**
@@ -58,7 +59,7 @@ namespace li
 			{
 				_ValType		value;
 				radix_node		*parent;	// parent slot
-				u16				height;		// height of subtree
+				s16				height;		// height of subtree
 				u16				size;		// number of occupied slots
 				u16				offset;		// parent->slots[offset] == this
 
@@ -73,7 +74,11 @@ namespace li
 				offset (0),
 				slots () {}
 
-				radix_node (_ValType value) : value (value) {}
+				radix_node (_ValType value) : parent (this),
+				height (-1),
+				size (1),
+				offset (0),
+				value (value) {}
 
 				// dfs delete
 				~radix_node ()
@@ -180,7 +185,6 @@ namespace li
 					radix_node *p = new radix_node (val);
 					p->parent = parent;
 					p->offset = index;
-					p->height = -1;
 					slots[index] = p;
 				}
 
