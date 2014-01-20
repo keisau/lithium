@@ -12,7 +12,7 @@ namespace li
 		{
 			// typedefs
 		protected:
-			typedef typename _Traits::ptr_t				__hash_key_t;
+			typedef typename _Traits::ptr_t				__hash_ptr_t;
 			struct hash_node
 			{
 				_KeyType			key;
@@ -39,8 +39,8 @@ namespace li
 			li::pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
 			{
 				li::pair <iterator, bool> retval;
-				__hash_key_t key = _Traits::get_key (_key);
-				index_t _x = _hash ((u8 *)key, _Traits::get_size (key)) % _size;
+				__hash_ptr_t keyptr = _Traits::get_key (_key);
+				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (key)) % _size;
 				hash_node *node;
 
 				/* list_for_each_entry */
@@ -68,8 +68,8 @@ out:
 
 			iterator find (const _KeyType &_key)
 			{
-				__hash_key_t key = _Traits::get_key (_key);
-				index_t _x = _hash ((u8 *)key, _Traits::get_size (key)) % _size;
+				__hash_ptr_t keyptr = _Traits::get_key (_key);
+				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (key)) % _size;
 				hash_node *node;
 
 				/* list_for_each_entry */
