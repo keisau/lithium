@@ -22,6 +22,10 @@ int main ()
 		puts (_map[string (buf1)].c_str ());
 	}
 
+	_map.erase (_map.find (string ("1")));
+	_map.erase (_map.find (string ("6")));
+	_map.erase (string ("16"));
+
 	for (it = _map.begin (); it != _map.end (); ++it)
 		printf ("1 << %s = %s\n", it->first.c_str (), it->second.c_str());
 

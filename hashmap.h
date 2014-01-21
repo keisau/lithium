@@ -101,6 +101,25 @@ namespace li
 				return end ();
 			}
 
+			void erase (iterator iter)
+			{
+				hash_node *node = container_of (iter.p, hash_node, head);
+
+				delete node;
+			}
+			
+			size_t erase (_KeyType key)
+			{
+				iterator iter = find (key);
+				if (iter != end())
+				{
+					hash_node *node = container_of (iter.p, hash_node, head);
+					delete node;
+					return 1;
+				}
+				return 0;
+			}
+
 			_ValType& operator[] (const _KeyType &key) { 
 				iterator it = find (key); 
 				if (it == end ())
