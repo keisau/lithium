@@ -5,9 +5,14 @@
 #include "hash.h"
 #include "list.h"
 #include "iterator.h"
+
+
 namespace li
 {
-	template <typename _KeyType, typename _ValType, class _Traits = li::traits <_KeyType> >
+	template <typename _KeyType, 
+		typename _ValType, 
+		class _Equal = std::equal_to<_KeyType>,
+		class _Traits = li::traits <_KeyType> >
 		class hashmap
 		{
 			// typedefs
@@ -19,19 +24,21 @@ namespace li
 			 */
 			struct hash_node
 			{
-				_KeyType			key;
-				_ValType			value;
+				li::pair<_KeyType, _ValType>			value;
 				list_head			slot_head;			// chaining list_head
 				list_head			head;				// for iterator
 				hash_node () {}
-				hash_node (_KeyType key, _ValType value) :
-					key(key), value(value) {}
+				hash_node (_KeyType key, _ValType val) {
+					value.first = key;
+					value.second = val;
+				}
 			};
 
 		public:
 			// iterator
-			typedef li::list_head_iterator <hash_node, _ValType> iterator;
-			friend class li::list_head_iterator <hash_node, _ValType>;
+			typedef li::pair<_KeyType, _ValType> val_t;
+			typedef li::list_head_iterator <hash_node, val_t> iterator;
+			friend class li::list_head_iterator <hash_node, val_t>;
 
 			// public methods
 		public:
@@ -56,7 +63,7 @@ namespace li
 					/**
 					 * depends on equality operator of the key type
 					 */
-					if (node->key == _key) {
+					if (equal (node->value.first, _key)) {
 						// found
 						return li::make_pair (iterator (&node->head), false);
 					}
@@ -84,7 +91,7 @@ namespace li
 					/**
 					 * depends on equality operator of the key type
 					 */
-					if (node->key == _key) {
+					if (equal (node->value.first, _key)) {
 						// found
 						return iterator (&node->head);
 					}
@@ -94,7 +101,12 @@ namespace li
 				return end ();
 			}
 
-			_ValType& operator[] (const _KeyType &key) { return *(find (key)); }
+			_ValType& operator[] (const _KeyType &key) { 
+				iterator it = find (key); 
+				if (it == end ())
+					it = insert (key, _ValType ()).first;
+				return it->second;
+			}
 
 			iterator begin () {
 				return iterator (head.next);
@@ -119,6 +131,7 @@ namespace li
 			size_t					_size;
 			list_head				*_table;
 			list_head				head;
+			_Equal					equal;
 		};
 }
 #endif // __LITHIUM_HASHMAP_H__
