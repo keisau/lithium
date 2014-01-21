@@ -1,4 +1,4 @@
 lithium
 =======
 
-A minimalistic yet powerful library for C++
+A minimalistic library for C++. Hope you will find it useful
