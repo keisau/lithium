@@ -16,11 +16,11 @@ int main ()
 		_map[string (buf1)] = string (buf2);
 	}
 	
-	//for (u64 i = 0, a = 1; i < 64; ++i, a <<= 1)
-	//{
-	//	sprintf (buf1, "%llu", i);
-	//	puts (_map[string (buf1)].c_str ());
-	//}
+	for (u64 i = 0, a = 1; i < 64; ++i, a <<= 1)
+	{
+		sprintf (buf1, "%llu", i);
+		puts (_map[string (buf1)].c_str ());
+	}
 
 	for (it = _map.begin (); it != _map.end (); ++it)
 		printf ("1 << %s = %s\n", it->first.c_str (), it->second.c_str());
