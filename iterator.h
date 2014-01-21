@@ -17,7 +17,7 @@
 #ifndef __LITHIUM_ITERATOR_H__
 #define __LITHIUM_ITERATOR_H__
 
-#include <iterator>
+#include "types.h"
 namespace li
 {
 	/**
@@ -29,10 +29,12 @@ namespace li
 	 * 2. _Class must include a member variable value of type _ValType.
 	 *
 	 * Assumption:
-	 * 1. _Class is a POD type (for using container_of)
+	 * 1. _Class is a POD type (not compulsory, most compiler even supports 
+	 *	non-POD types)
 	 * 2. _ValType provides the operators required
 	 */
-	template <class _Class, typename _ValType>
+	template <class _Class,
+			 typename _ValType>
 	struct list_head_iterator :
 		public std::iterator <std::bidirectional_iterator_tag, _ValType>
 	{
