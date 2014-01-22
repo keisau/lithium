@@ -49,25 +49,13 @@ namespace li
 
 			li::pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
 			{
-				__hash_ptr_t keyptr = _Traits::get_key_ptr (_key);
-				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % _size;
 				hash_node *node;
+				list_head *root, *lhead;
+				lhead = _find (_key, root);
 
-				/* list_for_each_entry */
-				list_head *root = _table + _x;
-				for (list_head *p = root->next;
-						p != root; 
-						p = p->next)
-				{
-					node = container_of (p, hash_node, slot_head);
-					/**
-					 * depends on equality operator of the key type
-					 */
-					if (equal (node->value.first, _key)) {
-						// found
-						return li::make_pair (iterator (&node->head), false);
-					}
-				}
+				/* key exists in the map, don't insert */
+				if (lhead != &head)
+					return li::make_pair (iterator (lhead), false);
 
 				/* key not found, insert */
 				node = new hash_node (_key, val);
@@ -78,43 +66,22 @@ namespace li
 
 			iterator find (const _KeyType &_key)
 			{
-				__hash_ptr_t keyptr = _Traits::get_key_ptr (_key);
-				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % _size;
-				hash_node *node;
-
-				/* list_for_each_entry */
-				for (list_head *root = _table + _x, *p = root->next;
-						p != root; 
-						p = p->next)
-				{
-					node = container_of (p, hash_node, slot_head);
-					/**
-					 * depends on equality operator of the key type
-					 */
-					if (equal (node->value.first, _key)) {
-						// found
-						return iterator (&node->head);
-					}
-				}
-
-				// not found
-				return end ();
+				list_head *root;
+				return iterator (_find (_key, root));
 			}
 
-			void erase (iterator iter)
+			void erase (const iterator &iter)
 			{
 				hash_node *node = container_of (iter.p, hash_node, head);
-
 				delete node;
 			}
 			
-			size_t erase (_KeyType key)
+			size_t erase (const _KeyType &key)
 			{
 				iterator iter = find (key);
 				if (iter != end())
 				{
-					hash_node *node = container_of (iter.p, hash_node, head);
-					delete node;
+					erase (iter);
 					return 1;
 				}
 				return 0;
@@ -143,6 +110,35 @@ namespace li
 			 */
 			void _post_ctor () {
 				_table = new list_head [_size] ();
+			}
+
+			/**
+			 * find a key in the hashmap, setting root list_head for insert () without
+			 * sacrificing performance and design
+			 */
+			list_head *_find (const _KeyType &_key, list_head *&root)
+			{
+				__hash_ptr_t keyptr = _Traits::get_key_ptr (_key);
+				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % _size;
+				hash_node *node;
+
+				/* list_for_each_entry */
+				root = _table + _x;
+				for (list_head *p = root->next;
+						p != root; 
+						p = p->next)
+				{
+					node = container_of (p, hash_node, slot_head);
+					/**
+					 * depends on equality operator of the key type
+					 */
+					if (equal (node->value.first, _key)) {
+						// found
+						return &node->head;
+					}
+				}
+
+				return &head;
 			}
 
 			// attributes
