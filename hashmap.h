@@ -6,7 +6,6 @@
 #include "list.h"
 #include "iterator.h"
 
-
 namespace li
 {
 	template <typename _KeyType, 
@@ -55,7 +54,8 @@ namespace li
 				hash_node *node;
 
 				/* list_for_each_entry */
-				for (list_head *root = _table + _x, *p = root->next;
+				list_head *root = _table + _x;
+				for (list_head *p = root->next;
 						p != root; 
 						p = p->next)
 				{
@@ -71,7 +71,7 @@ namespace li
 
 				/* key not found, insert */
 				node = new hash_node (_key, val);
-				list_insert (_table + _x, &node->slot_head);
+				list_insert (root, &node->slot_head);
 				list_insert (&head, &node->head);
 				return li::make_pair (iterator (&node->head), true);
 			}
