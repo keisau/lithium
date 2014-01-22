@@ -12,8 +12,10 @@ char buf1[128], buf2[128];
 int main ()
 {
 	hashmap <string, string> _map;
+	hashmap <int, int> _map2;
 	hashmap <string, string>::iterator it;
 
+	_map2.insert (1, 1);
 	for (u64 i = 0, a = 1; i < 64; ++i, a <<= 1)
 	{
 		sprintf (buf1, "%llu", i);
