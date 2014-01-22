@@ -1,9 +1,14 @@
 #include "hashmap.h"
 #include <stdio.h>
 #include <string>
+#include <string.h>
+#include <algorithm>
+#include "string.h"
+
 using namespace li;
 using namespace std;
 char buf1[128], buf2[128];
+
 int main ()
 {
 	hashmap <string, string> _map;
