@@ -88,7 +88,7 @@ namespace li
 				}
 
 				// dfs delete
-				~radix_node ()
+				virtual ~radix_node ()
 				{
 					radix_node *slot;
 					if (height >= 0)
@@ -100,6 +100,8 @@ namespace li
 						}
 				}
 			};
+
+
 
 			// types
 		public:
