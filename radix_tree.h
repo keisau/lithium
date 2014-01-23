@@ -55,30 +55,37 @@ namespace li
 			/**
 			 * radix tree node
 			 */
+			typedef li::pair<index_t, _ValType> val_t;
 			struct radix_node
 			{
-				_ValType		value;
-				radix_node		*parent;	// parent slot
-				s16				height;		// height of subtree
-				u16				size;		// number of occupied slots
-				u16				offset;		// parent->slots[offset] == this
+				val_t					value;
+				radix_node				*parent;	// parent slot
+				s16						height;		// height of subtree
+				u16						size;		// number of occupied slots
+				u16						offset;		// parent->slots[offset] == this
 
 				// linked list for O(n) stepwise iteration (BFS)
 				list_head		head;
 
 				radix_node		*slots [RT_BRANCH_FACTOR];
 
-				radix_node () :	parent (this),
-						   height (0),
+				radix_node () :	height (0),
 						   size (0),
-						   offset (0),
-						   slots () {}
+						   offset (0)
+				{
+					for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
+						slots [i] = NULL;
+					parent = this;
+				}
 
-				radix_node (_ValType value) : parent (this),
-						   height (-1),
+				radix_node (index_t key, _ValType val) : height (-1),
 						   size (1),
-						   offset (0),
-						   value (value) {}
+						   offset (0) 
+				{
+					parent = this;
+					value.first = key;
+					value.second = val;
+				}
 
 				// dfs delete
 				~radix_node ()
@@ -96,27 +103,24 @@ namespace li
 
 			// types
 		public:
-			typedef li::list_head_iterator <radix_node, _ValType> iterator;
-			friend class li::list_head_iterator <radix_node, _ValType>;
+			typedef li::list_head_iterator <radix_node, val_t> iterator;
+			friend struct li::list_head_iterator <radix_node, val_t>;
 
 			// functions
 		public:
 			// default constructor
 			radix_tree ()
 			{
-				rt_root = new radix_node ();
-
-				// initialize max height
-				max_height = (u32) (div_round_up (sizeof (index_t) << 3,
-							RT_BRANCH_FACTOR_BIT));
-
-				// initialize max index array
-				u64 last = 1;
-				for (u32 i = 0; i < max_height; ++i)
+				__ctor ();
+			}
+			
+			radix_tree (radix_tree &tree)
+			{
+				__ctor ();
+				for (iterator it = tree.begin (); it != tree.end (); ++it)
 				{
-					max_index[i] = last << RT_BRANCH_FACTOR_BIT;
-					last = max_index[i];
-					--max_index[i];
+					val_t value = *it;
+					insert (value.first, value.second);
 				}
 			}
 
@@ -130,6 +134,16 @@ namespace li
 
 			iterator begin () { return iterator (head.next); }
 			iterator end () { return iterator (&head); }
+			
+			void clear () 
+			{
+				for (list_head *p = head.next, *nx;
+					p != &head && ((nx = p->next) || 1);
+					p = nx)
+				{
+					erase (iterator (p));
+				}
+			}
 
 			/**
 			 * Insert key-value pair
@@ -181,7 +195,7 @@ namespace li
 				retval.second = slots[index] == NULL;
 				if (retval.second)
 				{
-					radix_node *p = new radix_node (val);
+					radix_node *p = new radix_node (key, val);
 					p->parent = parent;
 					p->offset = index;
 					slots[index] = p;
@@ -274,10 +288,28 @@ out_not_found:
 
 			_ValType& operator[] (index_t key)
 			{
-				return *(find (key));
+				return (find (key))->second;
 			}
 
 		protected:
+			void __ctor ()
+			{
+				rt_root = new radix_node ();
+
+				// initialize max height
+				max_height = (u32) (div_round_up (sizeof (index_t) << 3,
+							RT_BRANCH_FACTOR_BIT));
+
+				// initialize max index array
+				u64 last = 1;
+				for (u32 i = 0; i < max_height; ++i)
+				{
+					max_index[i] = last << RT_BRANCH_FACTOR_BIT;
+					last = max_index[i];
+					--max_index[i];
+				}
+			}
+
 			radix_node * extend ()
 			{	// only happen on the root
 				radix_node * retval = new radix_node ();
@@ -288,6 +320,7 @@ out_not_found:
 				return retval;
 
 			}
+
 			void shrink (radix_node *node)		
 			{	// only happen on the root
 				while (node != rt_root && node->size == 0)
