@@ -9,6 +9,7 @@ using namespace li;
 int main ()
 {
 	radix_tree<string> tree;
+	printf ("size : %ld\n", sizeof (tree));
 	char buf [BUF_SIZE];
 	for (int i = 0; i < 64; ++i)
 	{
@@ -36,11 +37,16 @@ int main ()
 		}
 	}
 
-	for (radix_tree<string>::iterator it = tree.begin();
-			it != tree.end();
+	radix_tree<string> tree2 (tree);
+
+	tree.clear ();
+
+	puts ("another");
+	for (radix_tree<string>::iterator it = tree2.begin();
+			it != tree2.end();
 			++it)
 	{
-		printf ("%s\n", (*it).c_str());
+		printf ("%s\n", (*it).second.c_str());
 	}
 
 	return 0;
