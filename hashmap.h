@@ -32,20 +32,24 @@ namespace li
 					value.second = val;
 				}
 			};
-
 		public:
 			// iterator
 			typedef li::pair<_KeyType, _ValType> val_t;
 			typedef li::list_head_iterator <hash_node, val_t> iterator;
-			friend class li::list_head_iterator <hash_node, val_t>;
+			friend struct li::list_head_iterator <hash_node, val_t>;
 
 			// public methods
 		public:
-			hashmap () : _size (4096) { _post_ctor (); }
+			hashmap () : capacity (4096), size (0) { _post_ctor (); }
 
-			hashmap (size_t size) : _size (size) { _post_ctor (); }
+			hashmap (size_t capacity) : capacity (capacity), size (0) { _post_ctor (); }
 
-			~hashmap () {}
+			~hashmap () {
+				list_head *root = &head;
+				for (iterator it = begin (); it != end (); ++it)
+					erase (it);
+				delete [] table;
+			}
 
 			li::pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
 			{
@@ -61,6 +65,7 @@ namespace li
 				node = new hash_node (_key, val);
 				list_insert (root, &node->slot_head);
 				list_insert (&head, &node->head);
+				++size;
 				return li::make_pair (iterator (&node->head), true);
 			}
 
@@ -72,8 +77,10 @@ namespace li
 
 			void erase (const iterator &iter)
 			{
-				hash_node *node = container_of (iter.p, hash_node, head);
-				delete node;
+				if (iter.p != &head) {
+					hash_node *node = container_of (iter.p, hash_node, head);
+					delete node;
+				}
 			}
 			
 			size_t erase (const _KeyType &key)
@@ -85,6 +92,15 @@ namespace li
 					return 1;
 				}
 				return 0;
+			}
+
+			hashmap& operator= (hashmap &_map) {
+				for (iterator it = _map.begin (); it != _map.end (); ++it) {
+					val_t value = *it;
+					insert (value.first, value.second);
+				}
+				size = _map.size;
+				return *this;
 			}
 
 			_ValType& operator[] (const _KeyType &key) { 
@@ -109,7 +125,7 @@ namespace li
 			 * initialization list
 			 */
 			void _post_ctor () {
-				_table = new list_head [_size] ();
+				table = new list_head [capacity] ();
 			}
 
 			/**
@@ -119,11 +135,11 @@ namespace li
 			list_head *_find (const _KeyType &_key, list_head *&root)
 			{
 				__hash_ptr_t keyptr = _Traits::get_key_ptr (_key);
-				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % _size;
+				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % capacity;
 				hash_node *node;
 
 				/* list_for_each_entry */
-				root = _table + _x;
+				root = table + _x;
 				for (list_head *p = root->next;
 						p != root; 
 						p = p->next)
@@ -143,8 +159,9 @@ namespace li
 
 			// attributes
 		protected:
-			size_t					_size;
-			list_head				*_table;
+			size_t					size;
+			size_t					capacity;
+			list_head				*table;
 			list_head				head;
 			_Equal					equal;
 		};
