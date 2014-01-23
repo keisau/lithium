@@ -93,7 +93,7 @@ static inline index_t _hash (const u8 *s, u32 len)
 	u8 *p = (u8*) s + size * sizeof (u64);
 	retval = _hash ((u64*) s, size);
 	for (u32 i = 0; i < rem; ++i)
-		retval ^= p[i] << (i * 8 /* size of a byte */);
+		retval ^= p[i] << (i << 3 /* size of a byte */);
 	return retval;
 }
 
@@ -110,7 +110,7 @@ static inline index_t _hash (const _KeyType &key)
 	// handle trailing bytes
 	u8 *p = (u8*) (((u64*) &key) + size);
 	for (u32 i = 0; i < rem; ++i)
-		retval ^= p[i] << (i * 8 /* size of a byte */);
+		retval ^= p[i] << (i << 3 /* size of a byte */);
 
 	return retval;
 }
