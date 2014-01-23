@@ -41,17 +41,18 @@ namespace li
 
 			// public methods
 		public:
+			// default constructor
 			hashmap () : _capacity (4096), _size (0) { _post_ctor (); }
 
 			hashmap (size_t capacity) : _capacity (capacity), _size (0) { _post_ctor (); }
 
+			// copy constructor
 			hashmap (const hashmap &_map) : _size (_map.size ()),
 				_capacity (_map.capacity ())
 			{
 				_post_ctor ();
-				
-				const list_head *root = &_map._head;
-				for (list_head *p = root->next;
+
+				for (const list_head *root = &_map._head, *p = root->next;
 					p != root;
 					p = p->next)
 				{
