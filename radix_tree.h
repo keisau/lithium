@@ -58,14 +58,11 @@ namespace li
 			typedef li::pair<index_t, _ValType> val_t;
 			struct radix_node
 			{
-				val_t					value;
 				radix_node				*parent;	// parent slot
 				s16						height;		// height of subtree
 				u16						size;		// number of occupied slots
 				u16						offset;		// parent->slots[offset] == this
 
-				// linked list for O(n) stepwise iteration (BFS)
-				list_head		head;
 
 				radix_node		*slots [RT_BRANCH_FACTOR];
 
@@ -76,15 +73,6 @@ namespace li
 					for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
 						slots [i] = NULL;
 					parent = this;
-				}
-
-				radix_node (index_t key, _ValType val) : height (-1),
-						   size (1),
-						   offset (0) 
-				{
-					parent = this;
-					value.first = key;
-					value.second = val;
 				}
 
 				// dfs delete
@@ -101,12 +89,23 @@ namespace li
 				}
 			};
 
-
+			struct data_node {
+				val_t					value;
+				radix_node				*parent;	// parent slot
+				list_head				head;
+				u16						offset;		// parent->slots[offset] == this
+				data_node (index_t key, _ValType val) : offset (0) 
+				{
+					value.first = key;
+					value.second = val;
+				}
+				virtual ~data_node () {}
+			};
 
 			// types
 		public:
-			typedef li::list_head_iterator <radix_node, val_t> iterator;
-			friend struct li::list_head_iterator <radix_node, val_t>;
+			typedef li::list_head_iterator <data_node, val_t> iterator;
+			friend struct li::list_head_iterator <data_node, val_t>;
 
 			// functions
 		public:
@@ -154,6 +153,7 @@ namespace li
 
 			{
 				li::pair<iterator, bool> retval;
+				data_node *node;
 				radix_node *parent, *slot, **slots;
 				register u32 height, index, shift;
 
@@ -197,17 +197,17 @@ namespace li
 				retval.second = slots[index] == NULL;
 				if (retval.second)
 				{
-					radix_node *p = new radix_node (key, val);
-					p->parent = parent;
-					p->offset = index;
-					slots[index] = p;
+					node = new data_node (key, val);
+					node->parent = parent;
+					node->offset = index;
+					slots[index] = (radix_node *)node;
 				}
 
 				// insert to the iteration list
-				list_insert (&head, &slots[index]->head);
+				list_insert (&head, &node->head);
 
 				// return iterator with the destination item (no matter new/old)
-				retval.first = iterator (&slots[index]->head);
+				retval.first = iterator (&node->head);
 
 				return retval;
 			}
@@ -247,8 +247,8 @@ namespace li
 				// ready to insert value after DFS
 				index = key & (RT_BRANCH_INDEX_MASK);
 
-				slot = slots[index];
-				retval = &slot->head;
+				data_node *node = (data_node*) slots[index];
+				retval = &node->head;
 out:
 				return iterator ((list_head *) retval);
 
@@ -275,17 +275,17 @@ out_not_found:
 			void erase (const iterator &iter)
 			{
 				list_head * tmp = iter.p;
-				radix_node *r_node = container_of (tmp, radix_node, head);
-				radix_node *p_node = r_node->parent;
+				data_node *d_node = container_of (tmp, data_node, head);
+				radix_node *p_node = d_node->parent;
 
 				/**
 				 * erase item in parent's slots
 				 */
-				p_node->slots [r_node->offset] = NULL;
+				p_node->slots [d_node->offset] = NULL;
 				--p_node->size;
 				if (p_node->size == 0)
 					shrink (p_node);
-				delete r_node;
+				delete d_node;
 			}
 
 			_ValType& operator[] (index_t key)
