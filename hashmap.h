@@ -5,6 +5,7 @@
 #include "hash.h"
 #include "list.h"
 #include "iterator.h"
+#include "string.h"
 
 namespace li
 {
@@ -40,15 +41,25 @@ namespace li
 
 			// public methods
 		public:
-			hashmap () : capacity (4096), size (0) { _post_ctor (); }
+			hashmap () : _capacity (4096), _size (0) { _post_ctor (); }
 
-			hashmap (size_t capacity) : capacity (capacity), size (0) { _post_ctor (); }
+			hashmap (size_t capacity) : _capacity (capacity), _size (0) { _post_ctor (); }
 
 			~hashmap () {
-				list_head *root = &head;
-				for (iterator it = begin (); it != end (); ++it)
-					erase (it);
-				delete [] table;
+				clear ();
+				delete [] _table;
+			}
+
+			void clear () {
+				list_head *root = &_head;
+				for (list_head *p = root->next, *nx;
+					p != root && ((nx = p->next) || 1);
+					p = nx)
+				{
+					hash_node *node = container_of (p, hash_node, head);
+					delete node;
+					--_size;
+				}
 			}
 
 			li::pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
@@ -58,14 +69,14 @@ namespace li
 				lhead = _find (_key, root);
 
 				/* key exists in the map, don't insert */
-				if (lhead != &head)
+				if (lhead != &_head)
 					return li::make_pair (iterator (lhead), false);
 
 				/* key not found, insert */
 				node = new hash_node (_key, val);
 				list_insert (root, &node->slot_head);
-				list_insert (&head, &node->head);
-				++size;
+				list_insert (&_head, &node->head);
+				++_size;
 				return li::make_pair (iterator (&node->head), true);
 			}
 
@@ -77,9 +88,11 @@ namespace li
 
 			void erase (const iterator &iter)
 			{
-				if (iter.p != &head) {
-					hash_node *node = container_of (iter.p, hash_node, head);
+				if (iter.p != &_head) {
+					list_head *p = iter.p;
+					hash_node *node = container_of (p, hash_node, head);
 					delete node;
+					--_size;
 				}
 			}
 			
@@ -94,12 +107,25 @@ namespace li
 				return 0;
 			}
 
-			hashmap& operator= (hashmap &_map) {
-				for (iterator it = _map.begin (); it != _map.end (); ++it) {
-					val_t value = *it;
+			hashmap& operator= (const hashmap &_map) {
+				size_t _cap = _map.capacity ();
+				clear ();
+				if (_capacity != _cap) {
+					delete [] _table;
+					_capacity = _cap;
+					_table = new list_head [_capacity] ();
+				}
+
+				const list_head *root = &_map._head;
+				for (list_head *p = root->next;
+					p != root;
+					p = p->next)
+				{
+					hash_node *node = container_of (p, hash_node, head);
+					val_t value = node->value;
 					insert (value.first, value.second);
 				}
-				size = _map.size;
+
 				return *this;
 			}
 
@@ -111,12 +137,14 @@ namespace li
 			}
 
 			iterator begin () {
-				return iterator (head.next);
+				return iterator (_head.next);
 			}
 
 			iterator end () {
-				return iterator (&head);
+				return iterator (&_head);
 			}
+
+			size_t capacity () const { return _capacity; }
 
 			// protected methods
 		protected:
@@ -125,7 +153,7 @@ namespace li
 			 * initialization list
 			 */
 			void _post_ctor () {
-				table = new list_head [capacity] ();
+				_table = new list_head [_capacity] ();
 			}
 
 			/**
@@ -135,11 +163,11 @@ namespace li
 			list_head *_find (const _KeyType &_key, list_head *&root)
 			{
 				__hash_ptr_t keyptr = _Traits::get_key_ptr (_key);
-				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % capacity;
+				index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % _capacity;
 				hash_node *node;
 
 				/* list_for_each_entry */
-				root = table + _x;
+				root = _table + _x;
 				for (list_head *p = root->next;
 						p != root; 
 						p = p->next)
@@ -148,22 +176,22 @@ namespace li
 					/**
 					 * depends on equality operator of the key type
 					 */
-					if (equal (node->value.first, _key)) {
+					if (_equal (node->value.first, _key)) {
 						// found
 						return &node->head;
 					}
 				}
 
-				return &head;
+				return &_head;
 			}
 
 			// attributes
 		protected:
-			size_t					size;
-			size_t					capacity;
-			list_head				*table;
-			list_head				head;
-			_Equal					equal;
+			size_t					_size;
+			size_t					_capacity;
+			list_head				*_table;
+			list_head				_head;
+			_Equal					_equal;
 		};
 }
 #endif // __LITHIUM_HASHMAP_H__
