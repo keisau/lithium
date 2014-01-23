@@ -53,7 +53,7 @@ namespace li
 		{
 		protected:
 			/**
-			 * radix tree node
+			 * radix tree indicing node
 			 */
 			typedef li::pair<index_t, _ValType> val_t;
 			struct radix_node
@@ -62,9 +62,7 @@ namespace li
 				s16						height;		// height of subtree
 				u16						size;		// number of occupied slots
 				u16						offset;		// parent->slots[offset] == this
-
-
-				radix_node		*slots [RT_BRANCH_FACTOR];
+				radix_node				*slots [RT_BRANCH_FACTOR];		// branch slots
 
 				radix_node () :	height (0),
 						   size (0),
@@ -89,16 +87,26 @@ namespace li
 				}
 			};
 
+			/**
+			 * radix tree data node
+			 */
 			struct data_node {
-				val_t					value;
 				radix_node				*parent;	// parent slot
-				list_head				head;
+				list_head				head;		// list_head for iterator and more features
 				u16						offset;		// parent->slots[offset] == this
+				val_t					value;		// value pair
+
+				// default constructor
+				data_node () {}
+
+				// key-value constructor
 				data_node (index_t key, _ValType val) : offset (0) 
 				{
 					value.first = key;
 					value.second = val;
 				}
+
+				// must override to prevent calling radix_node destructor
 				virtual ~data_node () {}
 			};
 
@@ -110,10 +118,7 @@ namespace li
 			// functions
 		public:
 			// default constructor
-			radix_tree ()
-			{
-				__ctor ();
-			}
+			radix_tree () { __ctor (); }
 			
 			radix_tree (radix_tree &tree)
 			{
