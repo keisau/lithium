@@ -45,14 +45,30 @@ namespace li
 
 			hashmap (size_t capacity) : _capacity (capacity), _size (0) { _post_ctor (); }
 
+			hashmap (const hashmap &_map) : _size (_map.size ()),
+				_capacity (_map.capacity ())
+			{
+				_post_ctor ();
+				
+				const list_head *root = &_map._head;
+				for (list_head *p = root->next;
+					p != root;
+					p = p->next)
+				{
+					hash_node *node = container_of (p, hash_node, head);
+					val_t value = node->value;
+					insert (value.first, value.second);
+				}
+			}
+
 			~hashmap () {
 				clear ();
 				delete [] _table;
 			}
 
 			void clear () {
-				list_head *root = &_head;
-				for (list_head *p = root->next, *nx;
+				// list_for_each_entry_safe
+				for (list_head *root = &_head, *p = root->next, *nx;
 					p != root && ((nx = p->next) || 1);
 					p = nx)
 				{
@@ -130,9 +146,7 @@ namespace li
 			}
 
 			_ValType& operator[] (const _KeyType &key) { 
-				iterator it = find (key); 
-				if (it == end ())
-					it = insert (key, _ValType ()).first;
+				iterator it = insert (key, _ValType ()).first;
 				return it->second;
 			}
 
@@ -145,6 +159,7 @@ namespace li
 			}
 
 			size_t capacity () const { return _capacity; }
+			size_t size () const { return _size; }
 
 			// protected methods
 		protected:
