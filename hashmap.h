@@ -42,15 +42,15 @@ namespace li
 			// public methods
 		public:
 			// default constructor
-			hashmap () : _capacity (4096), _size (0) { _post_ctor (); }
+			hashmap () : _capacity (4096), _size (0) { __ctor (); }
 
-			hashmap (size_t capacity) : _capacity (capacity), _size (0) { _post_ctor (); }
+			hashmap (size_t capacity) : _capacity (capacity), _size (0) { __ctor (); }
 
 			// copy constructor
 			hashmap (const hashmap &_map) : _size (_map.size ()),
 				_capacity (_map.capacity ())
 			{
-				_post_ctor ();
+				__ctor ();
 
 				for (const list_head *root = &_map._head, *p = root->next;
 					p != root;
@@ -168,7 +168,7 @@ namespace li
 			 * post-constructor initialization - run after constructor's
 			 * initialization list
 			 */
-			void _post_ctor () {
+			void __ctor () {
 				_table = new list_head [_capacity] ();
 			}
 
