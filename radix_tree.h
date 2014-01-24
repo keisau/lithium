@@ -55,7 +55,7 @@ protected:
 	/**
 	 * radix tree indicing node
 	 */
-	typedef li::pair<index_t, _ValType> val_t;
+	typedef pair<index_t, _ValType> val_t;
 	struct radix_node
 	{
 		radix_node				*parent;	// parent slot
@@ -112,11 +112,11 @@ protected:
 
 	// types
 public:
-	typedef li::list_head_iterator <data_node, val_t> iterator;
-	friend struct li::list_head_iterator <data_node, val_t>;
+	typedef list_head_iterator <data_node, val_t> iterator;
+	friend struct list_head_iterator <data_node, val_t>;
 
-	typedef li::const_list_head_iterator <data_node, val_t> const_iterator;
-	friend struct li::const_list_head_iterator <data_node, val_t>;
+	typedef const_list_head_iterator <data_node, val_t> const_iterator;
+	friend struct const_list_head_iterator <data_node, val_t>;
 
 	// functions
 public:
@@ -162,10 +162,10 @@ public:
 	/**
 	 * Insert key-value pair
 	 */
-	li::pair<iterator, bool> insert (index_t key, _ValType val)
+	pair<iterator, bool> insert (index_t key, _ValType val)
 
 	{
-		li::pair<iterator, bool> retval;
+		pair<iterator, bool> retval;
 		data_node *node;
 		radix_node *parent, *slot, **slots;
 		register u32 height, index, shift;
