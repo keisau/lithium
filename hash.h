@@ -1,10 +1,12 @@
-#ifndef __LITHIUM_HASH_H__
-#define __LITHIUM_HASH_H__
+#ifndef __LITHIUMLI_HASH_H__
+#define __LITHIUMLI_HASH_H__
 
 #include <string.h>			// memcpy, etc
 #include "types.h"
 
-#define _PRIME_MASK		0xf
+namespace li 
+{
+#define LI_PRIME_MASK		0xf
 // 16 selected primes
 const u32 _primes[16] = {
 	28472401U,
@@ -24,8 +26,9 @@ const u32 _primes[16] = {
 	3737267581U,
 	4129478957U,
 };
-#define GOLDEN_RATIO_PRIME_32 0x9e370001UL
-#define _HASH_SHIFT_MASK		0x1f
+#define GOLDEN_RATIO_PRIME_32			0x9e370001UL
+#define LI_HASH_SHIFT_MASK_32				0x1fUL
+#define LI_HASH_SHIFT_MASK_64				0x3fULL
 
 /**
  * Hash 32-bit integers to an integer of the designated bits,
@@ -67,40 +70,46 @@ static inline u64 hash_64(u64 val, unsigned int bits)
 	return retval >> (64 - bits);
 }
 
-static inline index_t _hash (const u32 *s, u32 len)
+static inline u64 _hash (const u32 *s, u32 len, u64 magic = GOLDEN_RATIO_PRIME_32)
 {
-	index_t retval = 0;
-	for (u32 i = 0; i < len; ++i)
-		retval ^= (u64) s[i] * _primes [i & _PRIME_MASK];
+	u64 retval = 0;
+	for (u32 i = 0; i < len; ++i) {
+		u16 bits = (u16)((u64)(i * magic) & LI_HASH_SHIFT_MASK_32);
+		retval ^= (u64) ((s[i] << (32 - bits)) | (s[i] >> bits)) * _primes [i & LI_PRIME_MASK];
+	}
 	
 	return retval;
 }
 
-static inline index_t _hash (const u64 *s, u32 len)
+static inline u64 _hash (const u64 *s, u32 len, u64 magic = GOLDEN_RATIO_PRIME_32)
 {
-	index_t retval = 0;
-	for (u32 i = 0; i < len; ++i)
-		retval ^= (s[i] >> (i & _HASH_SHIFT_MASK)) * _primes [i & _PRIME_MASK];
+	u64 retval = 0;
+	for (u32 i = 0; i < len; ++i) {
+		u16 bits = (u16)((u64)(i * magic) & LI_HASH_SHIFT_MASK_64);
+		retval ^= ((s[i] << (64 - bits)) | (s[i] >> bits)) * _primes [i & LI_PRIME_MASK];
+	}
 	
 	return retval;
 }
 
-static inline index_t _hash (const u8 *s, u32 len) 
+static inline u64 _hash (const u8 *s, u32 len) 
 {
-	index_t retval;
+	u64 retval;
 	u32 size = len / sizeof (u64);
 	u32 rem = len % sizeof (u64);
 	u8 *p = (u8*) s + size * sizeof (u64);
 	retval = _hash ((u64*) s, size);
+
+	// XOR the remaining < 64 bits
 	for (u32 i = 0; i < rem; ++i)
 		retval ^= p[i] << (i << 3 /* size of a byte */);
 	return retval;
 }
 
 template <typename _KeyType>
-static inline index_t _hash (const _KeyType &key)
+static inline u64 _hash (const _KeyType &key)
 {
-	index_t retval = 0;
+	u64 retval = 0;
 	u32 size = sizeof (_KeyType) / sizeof (u64);
 	u32 len = sizeof (key);
 	u32 rem = len % sizeof (u64);
@@ -114,5 +123,5 @@ static inline index_t _hash (const _KeyType &key)
 
 	return retval;
 }
-
-#endif // __LITHIUM_HASH_H__
+}
+#endif // __LITHIUMLI_HASH_H__
