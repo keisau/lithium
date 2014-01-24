@@ -12,13 +12,13 @@ namespace li
 template <typename _KeyType, 
 		 typename _ValType, 
 	 class _Equal = std::equal_to<_KeyType>,
- class _Traits = li::traits <_KeyType> >
+ class _Traits = traits <_KeyType> >
  class hashmap
 {
 	// typedefs
 protected:
 	typedef typename _Traits::ptr_t				__hash_ptr_t;
-	typedef li::pair<_KeyType, _ValType> val_t;
+	typedef pair<_KeyType, _ValType> val_t;
 
 	/**
 	 * A POD struct, hope it is safe for using container_of
@@ -36,11 +36,11 @@ protected:
 	};
 public:
 	// iterator
-	typedef li::list_head_iterator <hash_node, val_t> iterator;
-	friend struct li::list_head_iterator <hash_node, val_t>;
+	typedef list_head_iterator <hash_node, val_t> iterator;
+	friend struct list_head_iterator <hash_node, val_t>;
 
-	typedef li::const_list_head_iterator <hash_node, val_t> const_iterator;
-	friend struct li::const_list_head_iterator <hash_node, val_t>;
+	typedef const_list_head_iterator <hash_node, val_t> const_iterator;
+	friend struct const_list_head_iterator <hash_node, val_t>;
 
 	// public methods
 public:
@@ -90,7 +90,7 @@ public:
 		}
 	}
 
-	li::pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
+	pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
 	{
 		hash_node *node;
 		list_head *root, *lhead;
