@@ -6,6 +6,15 @@ using namespace std;
 using namespace li;
 
 #define BUF_SIZE 2048
+class A {
+public:
+	A () {
+	}
+	void test () const {
+		radix_tree<string>::const_iterator it = tree.begin ();
+	}
+	radix_tree<string> tree;
+};
 int main ()
 {
 	radix_tree<string> tree;
@@ -16,7 +25,8 @@ int main ()
 		sprintf (buf, "%llu", 1ULL << i);
 		tree.insert (1ULL << i, string (buf));
 	}
-	
+	A a;
+	a.test ();
 	//tree.erase (1ULL << 36);
 	//tree.erase (1ULL << 26);
 	//tree.erase (1ULL << 6);
