@@ -101,7 +101,7 @@ template <class _Class,
 			 }
 
 			 const_list_head_iterator operator++ (int) {
-				 list_head_iterator retval = const_list_head_iterator (*this);
+				 const_list_head_iterator retval = const_list_head_iterator (*this);
 				 p = p->next;
 				 return retval;
 			 }
@@ -112,7 +112,7 @@ template <class _Class,
 			 }
 
 			 const_list_head_iterator operator-- (int) {
-				 list_head_iterator retval = const_list_head_iterator (*this);
+				 const_list_head_iterator retval = const_list_head_iterator (*this);
 				 p = p->prev;
 				 return retval;
 			 }
