@@ -94,7 +94,7 @@ public:
 	{
 		hash_node *node;
 		list_head *root, *lhead;
-		lhead = _find (_key, root);
+		lhead = __find (_key, root);
 
 		/* key exists in the map, don't insert */
 		if (lhead != &_head)
@@ -111,13 +111,13 @@ public:
 	iterator find (const _KeyType &_key)
 	{
 		list_head *root;
-		return iterator (_find (_key, root)) ;
+		return iterator (__find (_key, root)) ;
 	}
 
 	const_iterator find (const _KeyType &_key) const
 	{
 		list_head *root;
-		return const_iterator (_find (_key, root));
+		return const_iterator (__find (_key, root));
 	}
 
 	void erase (iterator iter)
@@ -185,7 +185,7 @@ protected:
 	 * find a key in the hashmap, setting root list_head for insert () without
 	 * sacrificing performance and design
 	 */
-	list_head *_find (const _KeyType &_key, list_head *&root)
+	list_head *__find (const _KeyType &_key, list_head *&root)
 	{
 		__hash_ptr_t keyptr = _Traits::get_key_ptr (_key);
 		index_t _x = _hash ((u8 *)keyptr, _Traits::get_size (_key)) % _capacity;
