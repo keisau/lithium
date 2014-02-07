@@ -98,14 +98,14 @@ public:
 
 		/* key exists in the map, don't insert */
 		if (lhead != &_head)
-			return make_pair (iterator (lhead), false);
+			return li::make_pair (iterator (lhead), false);
 
 		/* key not found, insert */
 		node = new hash_node (_key, val);
 		list_insert (root, &node->slot_head);
 		list_insert (&_head, &node->head);
 		++_size;
-		return make_pair (iterator (&node->head), true);
+		return li::make_pair (iterator (&node->head), true);
 	}
 
 	iterator find (const _KeyType &_key)
