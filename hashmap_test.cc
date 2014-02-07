@@ -22,16 +22,17 @@ public:
 
 int main ()
 {
-	hashmap <string, string> _map;
-	hashmap <int, int> _map2;
+	hashmap <string, string> _map(1024);
+	hashmap <int, int> _map2(3);
 	hashmap <string, string>::iterator it;
 	map <int, int> _map4;
 	map <int, int>::const_iterator cmit = _map4.begin ();
 	A a;
 	a.test ();
 
+	printf ("_map cap: %d\n",_map.capacity ());
 	_map2.insert (1, 1);
-	_map = hashmap <string, string> ();
+	_map = hashmap <string, string> (3);
 	for (it = _map.begin (); it != _map.end (); ++it) {
 		printf ("1 << %s = %s\n", it->first.c_str (), it->second.c_str());
 	}
@@ -60,21 +61,23 @@ int main ()
 		puts ("gd");
 	else
 		puts ("bad");
-	_map.erase (_map.find (string ("1")));
-	_map.erase (_map.find (string ("6")));
-	_map.erase (string ("0"));
-	_map.erase (string ("1"));
-	_map.erase (string ("2"));
-	_map.erase (string ("3"));
-	_map.erase (string ("4"));
-	_map.erase (string ("5"));
-	_map.erase (string ("16"));
-
+	_map3.erase (_map3.find (string ("1")));
+	_map3.erase (_map3.find (string ("6")));
+	_map3.erase (string ("0"));
+	_map3.erase (string ("1"));
+	_map3.erase (string ("2"));
+	_map3.erase (string ("3"));
+	_map3.erase (string ("4"));
+	_map3.erase (string ("5"));
+	_map3.erase (string ("16"));
+	
+	puts ("_map3");
 	for (it = _map3.begin (); it != _map3.end (); ++it) {
 		printf ("1 << %s = %s\n", it->first.c_str (), it->second.c_str());
 	}
 	
 	if (_map3.empty ()) puts ("empty now");
 	else puts ("not empty");
+	printf ("_map3 size : %d, %d\n", _map3.capacity (), _map3.size ());
 	return 0;
 }
