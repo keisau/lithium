@@ -50,20 +50,20 @@ public:
 	hashmap (size_t capacity) : _capacity (capacity), _size (0) { __ctor (); }
 
 	// copy constructor
-	hashmap (const hashmap &_map) : _size (_map.size ()),
-			_capacity (_map.capacity ())
-			{
-				__ctor ();
+	hashmap (const hashmap &_map) : _size (0),
+		_capacity (_map.capacity ())
+	{
+		__ctor ();
 
-				for (const list_head *root = &_map._head, *p = root->next;
-						p != root;
-						p = p->next)
-				{
-					hash_node *node = container_of (p, hash_node, head);
-					val_t value = node->value;
-					insert (value.first, value.second);
-				}
-			}
+		for (const list_head *root = &_map._head, *p = root->next;
+			p != root;
+			p = p->next)
+		{
+			hash_node *node = container_of (p, hash_node, head);
+			val_t value = node->value;
+			insert (value.first, value.second);
+		}
+	}
 
 	~hashmap () {
 		clear ();
@@ -122,7 +122,7 @@ public:
 
 	void erase (iterator iter)
 	{
-		if (iter.p != &_head) {
+		if (iter != end()) {
 			list_head *p = iter.p;
 			hash_node *node = container_of (p, hash_node, head);
 			delete node;
