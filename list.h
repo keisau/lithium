@@ -14,10 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with lithium.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * Doubly-ended list utility
+ */
+
+/**
+ * Some codes come from linux kernel
+ *
+ * You may found the original code at:
+ * $(linux_src)/include/linux/list.h
+ */
+
 #ifndef __LITHIUM_LIST_H__
 #define __LITHIUM_LIST_H__
+
 #include "lithium.h"
 #include "types.h"
+
 namespace li
 {
 	struct list_head
@@ -32,9 +46,6 @@ namespace li
 
 	/**
 	 * copied from linux kernel - general list insert
-	 *
-	 * You may found the original code at:
-	 * $(linux_src)/include/linux/list.h
 	 */
 	static inline void __list_insert (list_head *item,
 			list_head *prev,
@@ -46,22 +57,32 @@ namespace li
 		prev->next = item;
 	}
 
+	/**
+	 * insert to head
+	 */
 	static inline void list_insert (list_head *head, list_head *item) {
 		__list_insert (item, head, head->next);
 	}
 
+	/**
+	 * insert to tail
+	 */
 	static inline void list_push_back (list_head *head, list_head *item) {
 		__list_insert (item, head->prev, head);
 	}
 
+	/**
+	 * delete
+	 */
 	static inline void list_delete (list_head *head) {
-		if (head) {
-			head->prev->next = head->next;
-			head->next->prev = head->prev;
-		}
+		head->prev->next = head->next;
+		head->next->prev = head->prev;
 		head->next = head->prev = NULL;
 	}
 
+	/**
+	 * list container class - to be merged with generic list_head iterator
+	 */
 	template <typename _ValType>
 		class list
 		{

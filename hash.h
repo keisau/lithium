@@ -1,3 +1,29 @@
+/**
+ * This file is part of lithium.
+ *
+ * lithium is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * lithium is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with lithium.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Hash utilities
+ * 
+ * Author: Pierre Saux
+ *
+ * Some codes come from linux kernel, here are the sources:
+ * Header: $(linux_src)/include/linux/hash.h
+ */
+
 #ifndef __LITHIUMLI_HASH_H__
 #define __LITHIUMLI_HASH_H__
 
@@ -26,7 +52,7 @@ const u32 _primes[16] = {
 	3737267581U,
 	4129478957U,
 };
-#define GOLDEN_RATIO_PRIME_32			0x9e370001UL
+#define GOLDEN_RATIO_PRIME_32				0x9e370001UL
 #define LI_HASH_SHIFT_MASK_32				0x1fUL
 #define LI_HASH_SHIFT_MASK_64				0x3fULL
 
@@ -70,6 +96,9 @@ static inline u64 hash_64(u64 val, unsigned int bits)
 	return retval >> (64 - bits);
 }
 
+/**
+ * hash an array of unsigned 32-bit integers with a magic randomizer
+ */
 static inline u64 _hash (const u32 *s, u32 len, u64 magic = GOLDEN_RATIO_PRIME_32)
 {
 	u64 retval = 0;
@@ -81,6 +110,9 @@ static inline u64 _hash (const u32 *s, u32 len, u64 magic = GOLDEN_RATIO_PRIME_3
 	return retval;
 }
 
+/**
+ * hash an array of unsigned 64-bit integers with a magic randomizer
+ */
 static inline u64 _hash (const u64 *s, u32 len, u64 magic = GOLDEN_RATIO_PRIME_32)
 {
 	u64 retval = 0;
@@ -92,6 +124,9 @@ static inline u64 _hash (const u64 *s, u32 len, u64 magic = GOLDEN_RATIO_PRIME_3
 	return retval;
 }
 
+/**
+ * hash a byte stream
+ */
 static inline u64 _hash (const u8 *s, u32 len) 
 {
 	u64 retval;
@@ -106,6 +141,9 @@ static inline u64 _hash (const u8 *s, u32 len)
 	return retval;
 }
 
+/**
+ * hash anything into an unsigned 64-bit integer
+ */
 template <typename _KeyType>
 static inline u64 _hash (const _KeyType &key)
 {

@@ -1,3 +1,29 @@
+/**
+ * This file is part of lithium.
+ *
+ * lithium is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * lithium is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with lithium.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Hashmap implementation
+ *
+ * Author: Pierre Saux
+ *
+ * Collision is resolved by chaining - no complicated algorithm, no overhead
+ * the trade-off is a bad performance theoretically
+ */
+
 #ifndef __LITHIUM_HASHMAP_H__
 #define __LITHIUM_HASHMAP_H__
 
@@ -174,8 +200,7 @@ public:
 	// protected methods
 protected:
 	/**
-	 * post-constructor initialization - run after constructor's
-	 * initialization list
+	 * constructor initialization - run after constructor's initialization list
 	 */
 	void __ctor () {
 		_table = new list_head [_capacity] ();
@@ -210,7 +235,7 @@ protected:
 		return &_head;
 	}
 
-	// attributes
+	// protected attributes
 protected:
 	size_t					_size;
 	size_t					_capacity;

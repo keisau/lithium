@@ -67,11 +67,11 @@ protected:
 		radix_node () :	height (0),
 				   size (0),
 				   offset (0)
-				   {
-					   for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
-						   slots [i] = NULL;
-					   parent = this;
-				   }
+		{
+		    for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
+		 	   slots [i] = NULL;
+		    parent = this;
+		}
 
 		// dfs delete
 		virtual ~radix_node ()

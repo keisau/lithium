@@ -14,6 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with lithium.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * iterator header
+ */
+
 #ifndef __LITHIUM_ITERATOR_H__
 #define __LITHIUM_ITERATOR_H__
 
