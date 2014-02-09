@@ -121,9 +121,9 @@ public:
 	// functions
 public:
 	// default constructor
-	radix_tree () { __ctor (); }
+	radix_tree () : _size (0) { __ctor (); }
 
-	radix_tree (radix_tree &tree)
+	radix_tree (radix_tree &tree) : _size (0)
 	{
 		__ctor ();
 		for (iterator it = tree.begin (); it != tree.end (); ++it)
@@ -158,6 +158,8 @@ public:
 			erase (iterator (p));
 		}
 	}
+
+	size_t size () { return _size; }
 
 	/**
 	 * Insert key-value pair
@@ -203,21 +205,23 @@ public:
 		// ready to insert value after DFS
 		index = key & (RT_BRANCH_INDEX_MASK);
 
-		// insert entry
-		parent->size++;
-
 		// check for existence
 		retval.second = slots[index] == NULL;
 		if (retval.second)
 		{
+			// insert entry
+			++parent->size;
+			++_size;
+
 			node = new data_node (key, val);
 			node->parent = parent;
 			node->offset = index;
 			slots[index] = (radix_node *)node;
+
+			// insert to the iteration list
+			list_insert (&head, &node->head);
 		}
 
-		// insert to the iteration list
-		list_insert (&head, &node->head);
 
 		// return iterator with the destination item (no matter new/old)
 		retval.first = iterator (&node->head);
@@ -265,6 +269,8 @@ public:
 		if (p_node->size == 0)
 			shrink (p_node);
 		delete d_node;
+
+		--_size;
 	}
 
 	_ValType& operator[] (index_t key)
@@ -317,6 +323,7 @@ protected:
 	{
 		list_head *retval;
 		radix_node *slot, **slots;
+		data_node *node;
 		register u32 height, index, shift;
 
 		if (key > max_index[rt_root->height])
@@ -345,7 +352,7 @@ protected:
 		// ready to insert value after DFS
 		index = key & (RT_BRANCH_INDEX_MASK);
 
-		data_node *node = (data_node*) slots[index];
+		node = (data_node*) slots[index];
 		retval = &node->head;
 out:
 		return retval;
@@ -357,6 +364,7 @@ out_not_found:
 
 	// member fields
 protected:
+	size_t			_size;
 	radix_node		*rt_root;
 	list_head		head;		// begin() & end()
 	u32				max_height;

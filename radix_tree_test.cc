@@ -59,5 +59,7 @@ int main ()
 		printf ("%s\n", (*it).second.c_str());
 	}
 
+	printf ("%d, %d\n", tree.size (), tree2.size ());
+
 	return 0;
 }
