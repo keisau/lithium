@@ -34,25 +34,24 @@
 
 namespace li
 {
-	using std::string;
 /**
  * Specialization for std::string for easier life
  */
 	template <>
-	struct traits <string>
+	struct traits <std::string>
 	{
 		typedef const char			*type_t;
 		typedef const char			*ptr_t;
 
-		static size_t get_size (const string &_in) {
+		static size_t get_size (const std::string &_in) {
 			return _in.length();
 		}
 
-		static type_t get_key (const string &_in) {
+		static type_t get_key (const std::string &_in) {
 			return _in.c_str();
 		}
 
-		static ptr_t get_key_ptr (const string &_in) {
+		static ptr_t get_key_ptr (const std::string &_in) {
 			return _in.c_str();
 		}
 	};

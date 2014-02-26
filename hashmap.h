@@ -22,6 +22,9 @@
  *
  * Collision is resolved by chaining - no complicated algorithm, no overhead
  * the trade-off is a bad performance theoretically
+ *
+ * Capacity is defined as hash table size; load factor should be calculated
+ * in terms of capacity.
  */
 
 #ifndef __LITHIUM_HASHMAP_H__
@@ -33,8 +36,10 @@
 #include "iterator.h"
 #include "string.h"
 
+// lithium library namespace, named after chemical name of lithium
 namespace li
 {
+// hashmap container class
 template <typename _KeyType, 
 		 typename _ValType, 
 	 class _Equal = std::equal_to<_KeyType>,
@@ -44,7 +49,7 @@ template <typename _KeyType,
 	// typedefs
 protected:
 	typedef typename _Traits::ptr_t				__hash_ptr_t;
-	typedef pair<_KeyType, _ValType> val_t;
+	typedef std::pair<_KeyType, _ValType> val_t;
 
 	/**
 	 * A POD struct, hope it is safe for using container_of
@@ -116,7 +121,7 @@ public:
 		}
 	}
 
-	pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
+	std::pair <iterator, bool> insert (const _KeyType &_key, const _ValType &val)
 	{
 		hash_node *node;
 		list_head *root, *lhead;
@@ -124,14 +129,14 @@ public:
 
 		/* key exists in the map, don't insert */
 		if (lhead != &_head)
-			return li::make_pair (iterator (lhead), false);
+			return std::make_pair (iterator (lhead), false);
 
 		/* key not found, insert */
 		node = new hash_node (_key, val);
 		list_insert (root, &node->slot_head);
 		list_insert (&_head, &node->head);
 		++_size;
-		return li::make_pair (iterator (&node->head), true);
+		return std::make_pair (iterator (&node->head), true);
 	}
 
 	iterator find (const _KeyType &_key)

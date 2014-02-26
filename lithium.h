@@ -30,6 +30,7 @@
 #ifndef __LITHIUM_H__
 #define __LITHIUM_H__
 
+#include <utility>
 #include "types.h"
 
 // lithium library templates
@@ -53,53 +54,6 @@ struct traits
 		return  (ptr_t) &_in;
 	}
 };
-
-#pragma pack (push, 1)
-template <typename _Type1, typename _Type2>
-struct pair
-{
-	_Type1		first;
-	_Type2		second;
-	pair& operator= (const pair& pr) { 
-		first = pr.first; second = pr.second;
-		return *this;
-	}
-
-	bool operator== (const pair& rvalue) {
-		return first == rvalue.first && second == rvalue.second;
-	}
-
-	bool operator!= (const pair& rvalue) {
-		return !(*this == rvalue);
-	}
-
-	bool operator<  (const pair& rvalue) { 
-		return first < rvalue.first 
-		|| (rvalue.first >= first && second < rvalue.second); 
-	}
-
-	bool operator<= (const pair& rvalue) {
-		return !(rvalue < *this);
-	}
-
-	bool operator>  (const pair& rvalue) {
-		return rvalue < *this; 
-	}
-
-	bool operator>= (const pair& rvalue) {
-		return !(*this < rvalue); 
-	}
-};
-#pragma pack (pop)
-
-	template <typename _Type1, typename _Type2>
-li::pair <_Type1, _Type2> make_pair (_Type1 x, _Type2 y)
-{
-	li::pair<_Type1, _Type2> retval;
-	retval.first = x;
-	retval.second = y;
-	return retval;
-}
 }
 
 // utility functions

@@ -55,7 +55,7 @@ protected:
 	/**
 	 * radix tree indicing node
 	 */
-	typedef pair<index_t, _ValType> val_t;
+	typedef std::pair<index_t, _ValType> val_t;
 	struct radix_node
 	{
 		radix_node				*parent;	// parent slot
@@ -164,10 +164,10 @@ public:
 	/**
 	 * Insert key-value pair
 	 */
-	pair<iterator, bool> insert (index_t key, _ValType val)
+	std::pair<iterator, bool> insert (index_t key, _ValType val)
 
 	{
-		pair<iterator, bool> retval;
+		std::pair<iterator, bool> retval;
 		data_node *node;
 		radix_node *parent, *slot, **slots;
 		register u32 height, index, shift;
