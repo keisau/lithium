@@ -41,10 +41,10 @@ namespace li
 {
 // hashmap container class
 template <typename _KeyType, 
-		 typename _ValType, 
-	 class _Equal = std::equal_to<_KeyType>,
- class _Traits = traits <_KeyType> >
- class hashmap
+		  typename _ValType, 
+		  class _Equal = std::equal_to<_KeyType>,
+		  class _Traits = traits <_KeyType> >
+class hashmap
 {
 	// typedefs
 protected:

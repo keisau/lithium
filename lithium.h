@@ -54,16 +54,13 @@ struct traits
 		return  (ptr_t) &_in;
 	}
 };
-}
 
 // utility functions
-namespace li
+static inline index_t div_round_up (index_t ll, index_t d)
 {
-	static inline index_t div_round_up (index_t ll, index_t d)
-	{
-		index_t tmp = ll + d - 1;
-		return tmp / d;
-	}
+	index_t tmp = ll + d - 1;
+	return tmp / d;
+}
 }
 
 // utility macros
@@ -81,7 +78,7 @@ namespace li
 #define container_of(ptr, type, member) ({						\
 		const char *__mptr = (char*) (ptr);						\
 		(type *) (__mptr - offsetof (type, member)); })
-#else
+#else // Windows Sucks
 #define container_of(ptr, type, member)							\
 	((type *) ((char*) (ptr) - offsetof (type, member)))
 #endif
