@@ -34,7 +34,7 @@ namespace li
 {
 #define LI_PRIME_MASK		0xf
 // 16 selected primes
-const u32 _primes[16] = {
+const static u32 _primes[16] = {
 	28472401U,
 	36525343U,
 	49979687U,

@@ -1,24 +1,14 @@
-#include "hashmap.h"
+#include <hashmap.h>
 #include <stdio.h>
 #include <string>
 #include <string.h>
+#include <lithium/string.h>
 #include <algorithm>
-#include "string.h"
 #include <map>
 
 using namespace li;
 using namespace std;
 char buf1[128], buf2[128];
-
-class A {
-public:
-	A () {
-	}
-	void test () const {
-		hashmap<int, int>::const_iterator it = _map.begin ();
-	}
-	hashmap <int, int> _map;
-};
 
 int main ()
 {
@@ -27,8 +17,6 @@ int main ()
 	hashmap <string, string>::iterator it;
 	map <int, int> _map4;
 	map <int, int>::const_iterator cmit = _map4.begin ();
-	A a;
-	a.test ();
 
 	printf ("_map cap: %d\n",_map.capacity ());
 	_map2.insert (1, 1);

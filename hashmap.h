@@ -30,11 +30,11 @@
 #ifndef __LITHIUM_HASHMAP_H__
 #define __LITHIUM_HASHMAP_H__
 
-#include "lithium.h"
-#include "hash.h"
-#include "list.h"
-#include "iterator.h"
-#include "string.h"
+#include <lithium.h>
+#include <hash.h>
+#include <list.h>
+#include <iterator.h>
+#include <string.h>
 
 // lithium library namespace, named after chemical name of lithium
 namespace li
