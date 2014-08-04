@@ -31,7 +31,7 @@
 #define __LITHIUM_H__
 
 #include <utility>
-#include "types.h"
+#include <lithium/types.h>
 
 // lithium library templates
 namespace li

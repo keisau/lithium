@@ -33,8 +33,8 @@
 #include <lithium.h>
 #include <hash.h>
 #include <list.h>
-#include <iterator.h>
-#include <string.h>
+#include <lithium/iterator.h>
+#include <lithium/string.h>
 
 // lithium library namespace, named after chemical name of lithium
 namespace li
@@ -49,7 +49,7 @@ class hashmap
 	// typedefs
 protected:
 	typedef typename _Traits::ptr_t				__hash_ptr_t;
-	typedef std::pair<_KeyType, _ValType> val_t;
+	typedef std::pair<_KeyType, _ValType>		val_t;
 
 	/**
 	 * A POD struct, hope it is safe for using container_of

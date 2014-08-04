@@ -24,11 +24,11 @@
  * Header: $(linux_src)/include/linux/hash.h
  */
 
-#ifndef __LITHIUMLI_HASH_H__
-#define __LITHIUMLI_HASH_H__
+#ifndef __LITHIUM_HASH_H__
+#define __LITHIUM_HASH_H__
 
-#include <string.h>			// memcpy, etc
-#include "types.h"
+#include <lithium/string.h>			// memcpy, etc
+#include <lithium/types.h>
 
 namespace li 
 {
@@ -162,4 +162,4 @@ static inline u64 _hash (const _KeyType &key)
 	return retval;
 }
 }
-#endif // __LITHIUMLI_HASH_H__
+#endif // __LITHIUM_HASH_H__

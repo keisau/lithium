@@ -29,6 +29,7 @@
 #ifndef __LITHIUM_STRING_H__
 #define __LITHIUM_STRING_H__
 
+#include <lithium.h>
 #include <string.h>
 #include <string>
 
@@ -37,23 +38,23 @@ namespace li
 /**
  * Specialization for std::string for easier life
  */
-	template <>
-	struct traits <std::string>
-	{
-		typedef const char			*type_t;
-		typedef const char			*ptr_t;
+template <>
+struct traits <std::string>
+{
+	typedef const char			*type_t;
+	typedef const char			*ptr_t;
 
-		static size_t get_size (const std::string &_in) {
-			return _in.length();
-		}
+	static size_t get_size (const std::string &_in) {
+		return _in.length();
+	}
 
-		static type_t get_key (const std::string &_in) {
-			return _in.c_str();
-		}
+	static type_t get_key (const std::string &_in) {
+		return _in.c_str();
+	}
 
-		static ptr_t get_key_ptr (const std::string &_in) {
-			return _in.c_str();
-		}
-	};
+	static ptr_t get_key_ptr (const std::string &_in) {
+		return _in.c_str();
+	}
+};
 }
 #endif // __LITHIUM_STRING_H__

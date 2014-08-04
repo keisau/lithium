@@ -1,6 +1,7 @@
-#include "lithium.h"
-#include "radix_tree.h"
+#include <lithium.h>
+#include <radix_tree.h>
 #include <string>
+#include <lithium/string.h>
 #include <stdio.h>
 using namespace std;
 using namespace li;

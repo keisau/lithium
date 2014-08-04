@@ -32,9 +32,9 @@
 #ifndef __LITHIUM_RADIX_TREE_H__
 #define __LITHIUM_RADIX_TREE_H__
 
-#include "lithium.h"
-#include "list.h"
-#include "iterator.h"
+#include <lithium.h>
+#include <list.h>
+#include <lithium/iterator.h>
 
 namespace li
 {
@@ -67,11 +67,11 @@ protected:
 		radix_node () :	height (0),
 				   size (0),
 				   offset (0)
-		{
-		    for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
-		 	   slots [i] = NULL;
-		    parent = this;
-		}
+				   {
+					   for (int i = 0; i < RT_BRANCH_FACTOR; ++i)
+						   slots [i] = NULL;
+					   parent = this;
+				   }
 
 		// dfs delete
 		virtual ~radix_node ()
@@ -165,7 +165,6 @@ public:
 	 * Insert key-value pair
 	 */
 	std::pair<iterator, bool> insert (index_t key, _ValType val)
-
 	{
 		std::pair<iterator, bool> retval;
 		data_node *node;

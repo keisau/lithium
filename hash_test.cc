@@ -1,5 +1,5 @@
-#include "hash.h"
-
+#include <hash.h>
+using namespace li;
 #pragma pack (push, 1)
 struct S
 {

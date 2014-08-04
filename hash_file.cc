@@ -1,8 +1,12 @@
-#include "hash.h"
+#include <hash.h>
 #include <unistd.h>
 #include <errno.h>
+#include <lithium/string.h>
+#include <stdio.h>
 #include <fcntl.h>
 #define BUF_SIZE	16384
+
+using namespace li;
 int main (int argc, char ** argv)
 {
 	if (argc > 1)

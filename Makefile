@@ -1,5 +1,6 @@
 TARGETS				= hash_file	\
 					  hash_test \
+					  hlist_test \
 					  hashmap_test \
 					  radix_tree_test
 
@@ -10,7 +11,7 @@ CXX					= c++
 all: $(TARGETS)
 
 clean:
-	@rm -rf $(TARGETS) *.o
+	rm -rf $(TARGETS) *.o
 
 %: %.c
 	$(CXX) $(CXXFLAGS) $< -o $@
